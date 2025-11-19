@@ -18,7 +18,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Agent Capabilities](https://agentclientprotocol.com/protocol/initialization#agent-capabilities)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class AgentCapabilities
+    public partial record AgentCapabilities
     {
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace OnlyHumans.Acp
     /// <br/>Notifications do not expect a response.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class AgentNotification
+    public partial record AgentNotification
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -86,7 +86,7 @@ namespace OnlyHumans.Acp
     /// <br/>[1]: https://www.jsonrpc.org/specification#compatibility
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class AgentOutgoingMessage
+    public partial record AgentOutgoingMessage
     {
 
         [Newtonsoft.Json.JsonProperty("jsonrpc", Required = Newtonsoft.Json.Required.Always)]
@@ -114,7 +114,7 @@ namespace OnlyHumans.Acp
     /// <br/>This enum encompasses all method calls from agent to client.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class AgentRequest
+    public partial record AgentRequest
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -137,7 +137,7 @@ namespace OnlyHumans.Acp
     /// <br/>These are responses to the corresponding `ClientRequest` variants.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class AgentResponse
+    public partial record AgentResponse
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -155,7 +155,7 @@ namespace OnlyHumans.Acp
     /// Optional annotations for the client. The client can use annotations to inform how objects are used or displayed
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class Annotations
+    public partial record Annotations
     {
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace OnlyHumans.Acp
     /// Describes an available authentication method.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class AuthMethod
+    public partial record AuthMethod
     {
 
         /// <summary>
@@ -234,7 +234,7 @@ namespace OnlyHumans.Acp
     /// <br/>Specifies which authentication method to use.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class AuthenticateRequest
+    public partial record AuthenticateRequest
     {
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace OnlyHumans.Acp
     /// Response to authenticate method
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class AuthenticateResponse
+    public partial record AuthenticateResponse
     {
 
         /// <summary>
@@ -290,7 +290,7 @@ namespace OnlyHumans.Acp
     /// Information about a command.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class AvailableCommand
+    public partial record AvailableCommand
     {
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace OnlyHumans.Acp
     /// The input specification for a command.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class AvailableCommandInput
+    public partial record AvailableCommandInput
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -352,7 +352,7 @@ namespace OnlyHumans.Acp
     /// Binary resource contents.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class BlobResourceContents
+    public partial record BlobResourceContents
     {
 
         /// <summary>
@@ -389,7 +389,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Cancellation](https://agentclientprotocol.com/protocol/prompt-turn#cancellation)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class CancelNotification
+    public partial record CancelNotification
     {
 
         /// <summary>
@@ -425,7 +425,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Client Capabilities](https://agentclientprotocol.com/protocol/initialization#client-capabilities)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ClientCapabilities
+    public partial record ClientCapabilities
     {
 
         /// <summary>
@@ -467,7 +467,7 @@ namespace OnlyHumans.Acp
     /// <br/>Notifications do not expect a response.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ClientNotification
+    public partial record ClientNotification
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -488,7 +488,7 @@ namespace OnlyHumans.Acp
     /// <br/>[1]: https://www.jsonrpc.org/specification#compatibility
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ClientOutgoingMessage
+    public partial record ClientOutgoingMessage
     {
 
         [Newtonsoft.Json.JsonProperty("jsonrpc", Required = Newtonsoft.Json.Required.Always)]
@@ -516,7 +516,7 @@ namespace OnlyHumans.Acp
     /// <br/>This enum encompasses all method calls from client to agent.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ClientRequest
+    public partial record ClientRequest
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -539,7 +539,7 @@ namespace OnlyHumans.Acp
     /// <br/>These are responses to the corresponding `AgentRequest` variants.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ClientResponse
+    public partial record ClientResponse
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -570,7 +570,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Content](https://agentclientprotocol.com/protocol/content)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ContentBlock
+    public partial record ContentBlock
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -588,7 +588,7 @@ namespace OnlyHumans.Acp
     /// Request to create a new terminal and execute a command.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class CreateTerminalRequest
+    public partial record CreateTerminalRequest
     {
 
         /// <summary>
@@ -658,7 +658,7 @@ namespace OnlyHumans.Acp
     /// Response containing the ID of the created terminal.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class CreateTerminalResponse
+    public partial record CreateTerminalResponse
     {
 
         /// <summary>
@@ -689,7 +689,7 @@ namespace OnlyHumans.Acp
     /// Resource content that can be embedded in a message.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class EmbeddedResourceResource
+    public partial record EmbeddedResourceResource
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -707,7 +707,7 @@ namespace OnlyHumans.Acp
     /// An environment variable to set when launching an MCP server.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class EnvVariable
+    public partial record EnvVariable
     {
 
         /// <summary>
@@ -750,7 +750,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [JSON-RPC Error Object](https://www.jsonrpc.org/specification#error_object)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class Error
+    public partial record Error
     {
 
         /// <summary>
@@ -792,7 +792,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [FileSystem](https://agentclientprotocol.com/protocol/initialization#filesystem)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class FileSystemCapability
+    public partial record FileSystemCapability
     {
 
         /// <summary>
@@ -828,7 +828,7 @@ namespace OnlyHumans.Acp
     /// An HTTP header to set when making requests to the MCP server.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class HttpHeader
+    public partial record HttpHeader
     {
 
         /// <summary>
@@ -867,7 +867,7 @@ namespace OnlyHumans.Acp
     /// <br/>title for UI representation.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class Implementation
+    public partial record Implementation
     {
 
         /// <summary>
@@ -914,7 +914,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Initialization](https://agentclientprotocol.com/protocol/initialization)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class InitializeRequest
+    public partial record InitializeRequest
     {
 
         /// <summary>
@@ -963,7 +963,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Initialization](https://agentclientprotocol.com/protocol/initialization)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class InitializeResponse
+    public partial record InitializeResponse
     {
 
         /// <summary>
@@ -1017,7 +1017,7 @@ namespace OnlyHumans.Acp
     /// Request to kill a terminal command without releasing the terminal.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class KillTerminalCommandRequest
+    public partial record KillTerminalCommandRequest
     {
 
         /// <summary>
@@ -1055,7 +1055,7 @@ namespace OnlyHumans.Acp
     /// Response to terminal/kill command method
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class KillTerminalCommandResponse
+    public partial record KillTerminalCommandResponse
     {
 
         /// <summary>
@@ -1083,7 +1083,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Loading Sessions](https://agentclientprotocol.com/protocol/session-setup#loading-sessions)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class LoadSessionRequest
+    public partial record LoadSessionRequest
     {
 
         /// <summary>
@@ -1128,7 +1128,7 @@ namespace OnlyHumans.Acp
     /// Response from loading an existing session.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class LoadSessionResponse
+    public partial record LoadSessionResponse
     {
 
         /// <summary>
@@ -1170,7 +1170,7 @@ namespace OnlyHumans.Acp
     /// MCP capabilities supported by the agent
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class McpCapabilities
+    public partial record McpCapabilities
     {
 
         /// <summary>
@@ -1212,7 +1212,7 @@ namespace OnlyHumans.Acp
     /// </summary>
     [Newtonsoft.Json.JsonConverter(typeof(JsonInheritanceConverter), "type")]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class McpServer
+    public partial record McpServer
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -1234,7 +1234,7 @@ namespace OnlyHumans.Acp
     /// <br/>Information about a selectable model.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ModelInfo
+    public partial record ModelInfo
     {
 
         /// <summary>
@@ -1280,7 +1280,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Creating a Session](https://agentclientprotocol.com/protocol/session-setup#creating-a-session)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class NewSessionRequest
+    public partial record NewSessionRequest
     {
 
         /// <summary>
@@ -1320,7 +1320,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Creating a Session](https://agentclientprotocol.com/protocol/session-setup#creating-a-session)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class NewSessionResponse
+    public partial record NewSessionResponse
     {
 
         /// <summary>
@@ -1371,7 +1371,7 @@ namespace OnlyHumans.Acp
     /// An option presented to the user when requesting permission.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class PermissionOption
+    public partial record PermissionOption
     {
 
         /// <summary>
@@ -1416,7 +1416,7 @@ namespace OnlyHumans.Acp
     /// Allow this operation only this time.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class PermissionOptionKind
+    public partial record PermissionOptionKind
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -1438,7 +1438,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Plan Entries](https://agentclientprotocol.com/protocol/agent-plan#plan-entries)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class PlanEntry
+    public partial record PlanEntry
     {
 
         /// <summary>
@@ -1484,7 +1484,7 @@ namespace OnlyHumans.Acp
     /// High priority task - critical to the overall goal.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class PlanEntryPriority
+    public partial record PlanEntryPriority
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -1502,7 +1502,7 @@ namespace OnlyHumans.Acp
     /// The task has not started yet.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class PlanEntryStatus
+    public partial record PlanEntryStatus
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -1531,7 +1531,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Prompt Capabilities](https://agentclientprotocol.com/protocol/initialization#prompt-capabilities)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class PromptCapabilities
+    public partial record PromptCapabilities
     {
 
         /// <summary>
@@ -1580,7 +1580,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [User Message](https://agentclientprotocol.com/protocol/prompt-turn#1-user-message)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class PromptRequest
+    public partial record PromptRequest
     {
 
         /// <summary>
@@ -1632,7 +1632,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Check for Completion](https://agentclientprotocol.com/protocol/prompt-turn#4-check-for-completion)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class PromptResponse
+    public partial record PromptResponse
     {
 
         /// <summary>
@@ -1665,7 +1665,7 @@ namespace OnlyHumans.Acp
     /// <br/>Only available if the client supports the `fs.readTextFile` capability.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ReadTextFileRequest
+    public partial record ReadTextFileRequest
     {
 
         /// <summary>
@@ -1717,7 +1717,7 @@ namespace OnlyHumans.Acp
     /// Response containing the contents of a text file.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ReadTextFileResponse
+    public partial record ReadTextFileResponse
     {
 
         /// <summary>
@@ -1745,7 +1745,7 @@ namespace OnlyHumans.Acp
     /// Request to release a terminal and free its resources.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ReleaseTerminalRequest
+    public partial record ReleaseTerminalRequest
     {
 
         /// <summary>
@@ -1783,7 +1783,7 @@ namespace OnlyHumans.Acp
     /// Response to terminal/release method
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ReleaseTerminalResponse
+    public partial record ReleaseTerminalResponse
     {
 
         /// <summary>
@@ -1807,7 +1807,7 @@ namespace OnlyHumans.Acp
     /// The outcome of a permission request.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class RequestPermissionOutcome
+    public partial record RequestPermissionOutcome
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -1829,7 +1829,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Requesting Permission](https://agentclientprotocol.com/protocol/tool-calls#requesting-permission)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class RequestPermissionRequest
+    public partial record RequestPermissionRequest
     {
 
         /// <summary>
@@ -1874,7 +1874,7 @@ namespace OnlyHumans.Acp
     /// Response to a permission request.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class RequestPermissionResponse
+    public partial record RequestPermissionResponse
     {
 
         /// <summary>
@@ -1924,7 +1924,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Session Modes](https://agentclientprotocol.com/protocol/session-modes)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class SessionMode
+    public partial record SessionMode
     {
 
         /// <summary>
@@ -1959,7 +1959,7 @@ namespace OnlyHumans.Acp
     /// The set of modes and the one currently active.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class SessionModeState
+    public partial record SessionModeState
     {
 
         /// <summary>
@@ -2001,7 +2001,7 @@ namespace OnlyHumans.Acp
     /// <br/>The set of models and the one currently active.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class SessionModelState
+    public partial record SessionModelState
     {
 
         /// <summary>
@@ -2043,7 +2043,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Agent Reports Output](https://agentclientprotocol.com/protocol/prompt-turn#3-agent-reports-output)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class SessionNotification
+    public partial record SessionNotification
     {
 
         /// <summary>
@@ -2085,7 +2085,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Agent Reports Output](https://agentclientprotocol.com/protocol/prompt-turn#3-agent-reports-output)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class SessionUpdate
+    public partial record SessionUpdate
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2103,7 +2103,7 @@ namespace OnlyHumans.Acp
     /// Request parameters for setting a session mode.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class SetSessionModeRequest
+    public partial record SetSessionModeRequest
     {
 
         /// <summary>
@@ -2141,7 +2141,7 @@ namespace OnlyHumans.Acp
     /// Response to `session/set_mode` method.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class SetSessionModeResponse
+    public partial record SetSessionModeResponse
     {
 
         [Newtonsoft.Json.JsonProperty("_meta", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -2166,7 +2166,7 @@ namespace OnlyHumans.Acp
     /// <br/>Request parameters for setting a session model.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class SetSessionModelRequest
+    public partial record SetSessionModelRequest
     {
 
         /// <summary>
@@ -2208,7 +2208,7 @@ namespace OnlyHumans.Acp
     /// <br/>Response to `session/set_model` method.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class SetSessionModelResponse
+    public partial record SetSessionModelResponse
     {
 
         /// <summary>
@@ -2232,7 +2232,7 @@ namespace OnlyHumans.Acp
     /// The turn ended successfully.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class StopReason
+    public partial record StopReason
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2250,7 +2250,7 @@ namespace OnlyHumans.Acp
     /// Exit status of a terminal command.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class TerminalExitStatus
+    public partial record TerminalExitStatus
     {
 
         /// <summary>
@@ -2287,7 +2287,7 @@ namespace OnlyHumans.Acp
     /// Request to get the current output and status of a terminal.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class TerminalOutputRequest
+    public partial record TerminalOutputRequest
     {
 
         /// <summary>
@@ -2325,7 +2325,7 @@ namespace OnlyHumans.Acp
     /// Response containing the terminal output and exit status.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class TerminalOutputResponse
+    public partial record TerminalOutputResponse
     {
 
         /// <summary>
@@ -2368,7 +2368,7 @@ namespace OnlyHumans.Acp
     /// Text-based resource contents.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class TextResourceContents
+    public partial record TextResourceContents
     {
 
         /// <summary>
@@ -2408,7 +2408,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Content](https://agentclientprotocol.com/protocol/tool-calls#content)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ToolCallContent
+    public partial record ToolCallContent
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2431,7 +2431,7 @@ namespace OnlyHumans.Acp
     /// <br/>See protocol docs: [Following the Agent](https://agentclientprotocol.com/protocol/tool-calls#following-the-agent)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ToolCallLocation
+    public partial record ToolCallLocation
     {
 
         /// <summary>
@@ -2470,7 +2470,7 @@ namespace OnlyHumans.Acp
     /// <br/>streaming or we're awaiting approval.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ToolCallStatus
+    public partial record ToolCallStatus
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2488,7 +2488,7 @@ namespace OnlyHumans.Acp
     /// Reading files or data.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ToolKind
+    public partial record ToolKind
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2506,7 +2506,7 @@ namespace OnlyHumans.Acp
     /// Request to wait for a terminal command to exit.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class WaitForTerminalExitRequest
+    public partial record WaitForTerminalExitRequest
     {
 
         /// <summary>
@@ -2544,7 +2544,7 @@ namespace OnlyHumans.Acp
     /// Response containing the exit status of a terminal command.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class WaitForTerminalExitResponse
+    public partial record WaitForTerminalExitResponse
     {
 
         /// <summary>
@@ -2583,7 +2583,7 @@ namespace OnlyHumans.Acp
     /// <br/>Only available if the client supports the `fs.writeTextFile` capability.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class WriteTextFileRequest
+    public partial record WriteTextFileRequest
     {
 
         /// <summary>
@@ -2628,7 +2628,7 @@ namespace OnlyHumans.Acp
     /// Response to `fs/write_text_file`
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class WriteTextFileResponse
+    public partial record WriteTextFileResponse
     {
 
         /// <summary>
@@ -2649,7 +2649,7 @@ namespace OnlyHumans.Acp
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class Ll
+    public partial record Ll
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2674,7 +2674,7 @@ namespace OnlyHumans.Acp
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class Input
+    public partial record Input
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2699,7 +2699,7 @@ namespace OnlyHumans.Acp
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class Annotations2
+    public partial record Annotations2
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2714,7 +2714,7 @@ namespace OnlyHumans.Acp
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ClientInfo
+    public partial record ClientInfo
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2729,7 +2729,7 @@ namespace OnlyHumans.Acp
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class AgentInfo
+    public partial record AgentInfo
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2744,7 +2744,7 @@ namespace OnlyHumans.Acp
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class Models
+    public partial record Models
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2759,7 +2759,7 @@ namespace OnlyHumans.Acp
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class Modes
+    public partial record Modes
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2774,7 +2774,7 @@ namespace OnlyHumans.Acp
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class Models2
+    public partial record Models2
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2789,7 +2789,7 @@ namespace OnlyHumans.Acp
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class Modes2
+    public partial record Modes2
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2804,7 +2804,7 @@ namespace OnlyHumans.Acp
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ToolCall
+    public partial record ToolCall
     {
 
         /// <summary>
@@ -2874,7 +2874,7 @@ namespace OnlyHumans.Acp
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class ExitStatus
+    public partial record ExitStatus
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2889,7 +2889,7 @@ namespace OnlyHumans.Acp
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class Kind
+    public partial record Kind
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2904,7 +2904,7 @@ namespace OnlyHumans.Acp
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class Status
+    public partial record Status
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;

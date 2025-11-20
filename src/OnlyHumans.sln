@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlyHumans.Acp", "OnlyHuman
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlyHumans.Base", "OnlyHumans.Base\OnlyHumans.Base.csproj", "{81DC24CF-B474-AE86-3438-648B93D220DF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlyHumans.Tests.Acp", "..\tests\OnlyHumans.Tests.Acp\OnlyHumans.Tests.Acp.csproj", "{032FE94F-4E7A-4885-A9CD-466057C67CB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{81DC24CF-B474-AE86-3438-648B93D220DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81DC24CF-B474-AE86-3438-648B93D220DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81DC24CF-B474-AE86-3438-648B93D220DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{032FE94F-4E7A-4885-A9CD-466057C67CB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{032FE94F-4E7A-4885-A9CD-466057C67CB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{032FE94F-4E7A-4885-A9CD-466057C67CB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{032FE94F-4E7A-4885-A9CD-466057C67CB8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

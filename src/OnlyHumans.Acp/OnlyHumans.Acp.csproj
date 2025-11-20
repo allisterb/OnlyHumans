@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="StreamJsonRpc" Version="2.22.23" />
   </ItemGroup>
 
 

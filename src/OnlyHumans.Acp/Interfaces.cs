@@ -1,108 +1,44 @@
-﻿namespace OnlyHumans.Acp;
-    
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-/// <summary>
-/// Interface for ACP Agent.
-/// </summary>
-public interface IAgent
+﻿namespace OnlyHumans.Acp
 {
-    /// <summary>
-    /// Handles initialization request from the client.
-    /// </summary>
-    /// <param name="request">Initialization request parameters.</param>
-    /// <returns>Initialization response.</returns>
-    Task<InitializeResponse> InitializeAsync(InitializeRequest request);
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using OnlyHumans;
 
-    /// <summary>
-    /// Handles authentication request from the client.
-    /// </summary>
-    /// <param name="request">Authentication request parameters.</param>
-    /// <returns>Authentication response.</returns>
-    Task<AuthenticateResponse> AuthenticateAsync(AuthenticateRequest request);
+    // Agent interface: methods the Client can call on the Agent
+    public interface IAgent
+    {
+        Task<Result<InitializeResponse>> InitializeAsync(InitializeRequest request);
+        Task<Result<AuthenticateResponse>> AuthenticateAsync(AuthenticateRequest request);
+        Task<Result<NewSessionResponse>> NewSessionAsync(NewSessionRequest request);
+        Task<Result<LoadSessionResponse>> LoadSessionAsync(LoadSessionRequest request);
+        Task<Result<PromptResponse>> PromptAsync(PromptRequest request);
+        Task<Result<SetSessionModeResponse>> SetSessionModeAsync(SetSessionModeRequest request);
+        Task<Result<SetSessionModelResponse>> SetSessionModelAsync(SetSessionModelRequest request);
+        Task CancelNotificationAsync(CancelNotification notification);
 
-    /// <summary>
-    /// Handles prompt request from the client.
-    /// </summary>
-    /// <param name="request">Prompt request parameters.</param>
-    /// <returns>Prompt response.</returns>
-    Task<PromptResponse> PromptAsync(PromptRequest request);
+        // Extension method for custom RPC calls
+        Task<Result<Dictionary<string, object>>> ExtMethodAsync(string method, Dictionary<string, object>? parameters = null);
+        // Extension notification for custom notifications
+        Task ExtNotificationAsync(string notification, Dictionary<string, object>? parameters = null);
+    }
 
-    /// <summary>
-    /// Handles session loading request.
-    /// </summary>
-    /// <param name="request">Load session request parameters.</param>
-    /// <returns>Load session response.</returns>
-    Task<LoadSessionResponse> LoadSessionAsync(LoadSessionRequest request);
+    // Client interface: methods the Agent can call on the Client
+    public interface IClient
+    {
+        Task SessionUpdateAsync(SessionNotification notification);
+        Task<Result<RequestPermissionResponse>> RequestPermissionAsync(RequestPermissionRequest request);
+            
+        Task<Result<CreateTerminalResponse>> CreateTerminalAsync(CreateTerminalRequest request);
+        Task<Result<KillTerminalCommandResponse>> KillTerminalCommandAsync(KillTerminalCommandRequest request);
+        Task<Result<ReleaseTerminalResponse>> ReleaseTerminalAsync(ReleaseTerminalRequest request);
+        Task<Result<TerminalOutputResponse>> TerminalOutputAsync(TerminalOutputRequest request);
+        Task<Result<WaitForTerminalExitResponse>> WaitForTerminalExitAsync(WaitForTerminalExitRequest request);
+        Task<Result<ReadTextFileResponse>> ReadTextFileAsync(ReadTextFileRequest request);
+        Task<Result<WriteTextFileResponse>> WriteTextFileAsync(WriteTextFileRequest request);
 
-    /// <summary>
-    /// Handles new session creation request.
-    /// </summary>
-    /// <param name="request">New session request parameters.</param>
-    /// <returns>New session response.</returns>
-    Task<NewSessionResponse> NewSessionAsync(NewSessionRequest request);
-
-    /// <summary>
-    /// Handles session mode change request.
-    /// </summary>
-    /// <param name="request">Set session mode request parameters.</param>
-    /// <returns>Set session mode response.</returns>
-    Task<SetSessionModeResponse> SetSessionModeAsync(SetSessionModeRequest request);
-
-    /// <summary>
-    /// Handles session model change request.
-    /// </summary>
-    /// <param name="request">Set session model request parameters.</param>
-    /// <returns>Set session model response.</returns>
-    Task<SetSessionModelResponse> SetSessionModelAsync(SetSessionModelRequest request);
-
-    /// <summary>
-    /// Handles permission request.
-    /// </summary>
-    /// <param name="request">Request permission parameters.</param>
-    /// <returns>Request permission response.</returns>
-    Task<RequestPermissionResponse> RequestPermissionAsync(RequestPermissionRequest request);
-
-    /// <summary>
-    /// Handles cancel notification.
-    /// </summary>
-    /// <param name="notification">Cancel notification parameters.</param>
-    /// <returns>Task representing the operation.</returns>
-    Task CancelAsync(CancelNotification notification);
-}
-
-/// <summary>
-/// Interface for ACP Client.
-/// </summary>
-public interface IClient
-{
-    Task<Result<RequestPermissionResponse>> RequestPermission(RequestPermissionRequest requestPermissionRequest);
-
-    Task SessionUpdate(SessionNotification sessionNotification);
-
-    Task<Result<WriteTextFileResponse>> WriteTextFile(WriteTextFileRequest request);
-    /// <summary>
-    /// Handles agent notification.
-    /// </summary>
-    /// <param name="notification">Agent notification parameters.</param>
-    /// <returns>Task representing the operation.</returns>
-    Task NotifyAsync(AgentNotification notification);
-
-    /// <summary>
-    /// Handles agent request.
-    /// </summary>
-    /// <param name="request">Agent request parameters.</param>
-    /// <returns>Agent response.</returns>
-    Task<AgentResponse> RequestAsync(AgentRequest request);
-
-    /// <summary>
-    /// Handles agent outgoing message.
-    /// </summary>
-    /// <param name="message">Agent outgoing message parameters.</param>
-    /// <returns>Task representing the operation.</returns>
-    Task SendMessageAsync(AgentOutgoingMessage message);
+        // Extension method for custom RPC calls
+        Task<Result<Dictionary<string, object>>> ExtMethodAsync(string method, Dictionary<string, object>? parameters = null);
+        // Extension notification for custom notifications
+        Task ExtNotificationAsync(string notification, Dictionary<string, object>? parameters = null);
+    }
 }

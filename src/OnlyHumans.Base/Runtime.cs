@@ -1,512 +1,512 @@
-namespace OnlyHumans
+namespace OnlyHumans;
+
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Reflection;
+using System.Threading;
+
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
+using static Result;
+
+public abstract class Runtime
 {
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Logging.Abstractions;
-    using System;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Linq;
-    using System.Net;
-    using System.Reflection;
-    using System.Threading;
-    
-    using static Result;
-
-    public abstract class Runtime
+    #region Constructors
+    static Runtime()
     {
-        #region Constructors
-        static Runtime()
-        {
-            AppDomain.CurrentDomain.UnhandledException += AppDomain_UnhandledException;
-            EntryAssembly = Assembly.GetEntryAssembly();
-            IsUnitTestRun = EntryAssembly?.FullName?.StartsWith("testhost") ?? false;
-            SessionId = Rng.Next(0, 99999);            
-        }
+        AppDomain.CurrentDomain.UnhandledException += AppDomain_UnhandledException;
+        EntryAssembly = Assembly.GetEntryAssembly();
+        IsUnitTestRun = EntryAssembly?.FullName?.StartsWith("testhost") ?? false;
+        SessionId = Rng.Next(0, 99999);            
+    }
 
-        public Runtime(CancellationToken ct)
-        {
-            Ct = ct;
-        }
+    public Runtime(CancellationToken ct)
+    {
+        Ct = ct;
+    }
 
-        public Runtime() : this(Cts.Token) { }
-        #endregion
+    public Runtime() : this(Cts.Token) { }
+    #endregion
 
-        #region Properties
-        public static bool RuntimeInitialized { get; protected set; }
+    #region Properties
+    public static bool RuntimeInitialized { get; protected set; }
 
-        public static bool DebugEnabled { get; set; }
+    public static bool DebugEnabled { get; set; }
 
-        public static bool InteractiveConsole { get; set; } = false;
+    public static bool InteractiveConsole { get; set; } = false;
 
-        public static string PathSeparator { get; } = Environment.OSVersion.Platform == PlatformID.Win32NT ? "\\" : "/";
+    public static string PathSeparator { get; } = Environment.OSVersion.Platform == PlatformID.Win32NT ? "\\" : "/";
 
-        public static string ToolName { get; set; } = "OnlyHumans";
+    public static string ToolName { get; set; } = "OnlyHumans";
         
-        public static string LogName { get; set; } = "BASE";
+    public static string LogName { get; set; } = "BASE";
 
-        public static string UserHomeDir => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+    public static string UserHomeDir => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        public static string AppDataDir => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+    public static string AppDataDir => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
-        public static string OnlyHumansDevDir => Path.Combine(AppDataDir, "OnlyHumansDev");
+    public static string OnlyHumansDevDir => Path.Combine(AppDataDir, "OnlyHumansDev");
 
-        public static Random Rng { get; } = new Random();
+    public static Random Rng { get; } = new Random();
 
-        public static int SessionId { get; protected set; }
+    public static int SessionId { get; protected set; }
 
-        public static CancellationTokenSource Cts { get; } = new CancellationTokenSource();
+    public static CancellationTokenSource Cts { get; } = new CancellationTokenSource();
 
-        public static CancellationToken Ct { get; protected set; } = Cts.Token;
+    public static CancellationToken Ct { get; protected set; } = Cts.Token;
 
-        public static Assembly? EntryAssembly { get; protected set; }
+    public static Assembly? EntryAssembly { get; protected set; }
 
-        public static string AssemblyLocation { get; } = Path.GetDirectoryName(Assembly.GetAssembly(typeof(Runtime))!.Location)!;
+    public static string AssemblyLocation { get; } = Path.GetDirectoryName(Assembly.GetAssembly(typeof(Runtime))!.Location)!;
 
-        public static Version AssemblyVersion { get; } = Assembly.GetAssembly(typeof(Runtime))!.GetName().Version!;
+    public static Version AssemblyVersion { get; } = Assembly.GetAssembly(typeof(Runtime))!.GetName().Version!;
         
-        public static string CurentDirectory => Directory.GetCurrentDirectory();
+    public static string CurentDirectory => Directory.GetCurrentDirectory();
 
-        public static bool IsUnitTestRun { get; set; }
+    public static bool IsUnitTestRun { get; set; }
 
-        public static string RunFile => OnlyHumansDevDir.CombinePath(ToolName + ".run");
-        #endregion
+    public static string RunFile => OnlyHumansDevDir.CombinePath(ToolName + ".run");
+    #endregion
 
-        #region Methods
-        public static void Initialize(string toolname, string logname, bool debug, ILoggerFactory lf, ILoggerProvider lp)
+    #region Methods
+    public static void Initialize(string toolname, string logname, bool debug, ILoggerFactory lf, ILoggerProvider lp)
+    {
+        lock (__lock)
         {
-            lock (__lock)
+            Info("Initialize called on thread id {0}.", Thread.CurrentThread.ManagedThreadId);
+            if (RuntimeInitialized)
             {
-                Info("Initialize called on thread id {0}.", Thread.CurrentThread.ManagedThreadId);
-                if (RuntimeInitialized)
-                {
-                    Info("Runtime already initialized.");
-                    return;
-                }
-                ToolName = toolname;
-                LogName = logname;
-                DebugEnabled = debug;
-                loggerFactory = lf;
-                loggerProvider = lp;
-                logger = lf.CreateLogger(toolname);
-                RuntimeInitialized = true;
+                Info("Runtime already initialized.");
+                return;
             }
+            ToolName = toolname;
+            LogName = logname;
+            DebugEnabled = debug;
+            loggerFactory = lf;
+            loggerProvider = lp;
+            logger = lf.CreateLogger(toolname);
+            RuntimeInitialized = true;
         }
+    }
 
-        public static void Initialize(string toolname, string logname, bool debug) => Initialize(toolname, logname, debug, NullLoggerFactory.Instance, NullLoggerProvider.Instance);
+    public static void Initialize(string toolname, string logname, bool debug) => Initialize(toolname, logname, debug, NullLoggerFactory.Instance, NullLoggerProvider.Instance);
         
-        [DebuggerStepThrough]
-        public static void Info(string messageTemplate, params object[] args) => logger.LogInformation(messageTemplate, args);
+    [DebuggerStepThrough]
+    public static void Info(string messageTemplate, params object[] args) => logger.LogInformation(messageTemplate, args);
 
-        [DebuggerStepThrough]
-        public static void Debug(string messageTemplate, params object[] args) => logger.LogDebug(messageTemplate, args);
+    [DebuggerStepThrough]
+    public static void Debug(string messageTemplate, params object[] args) => logger.LogDebug(messageTemplate, args);
 
-        [DebuggerStepThrough]
-        public static void Error(string messageTemplate, params object[] args) => logger.LogError(messageTemplate, args);
+    [DebuggerStepThrough]
+    public static void Error(string messageTemplate, params object[] args) => logger.LogError(messageTemplate, args);
 
-        [DebuggerStepThrough]
-        public static void Error(Exception ex, string messageTemplate, params object[] args) => logger.LogError(ex, messageTemplate, args);
+    [DebuggerStepThrough]
+    public static void Error(Exception ex, string messageTemplate, params object[] args) => logger.LogError(ex, messageTemplate, args);
 
-        [DebuggerStepThrough]
-        public static void Warn(string messageTemplate, params object[] args) => logger.LogWarning(messageTemplate, args);
+    [DebuggerStepThrough]
+    public static void Warn(string messageTemplate, params object[] args) => logger.LogWarning(messageTemplate, args);
 
-        [DebuggerStepThrough]
-        public static void Fatal(string messageTemplate, params object[] args) => logger.LogCritical(messageTemplate, args);
+    [DebuggerStepThrough]
+    public static void Fatal(string messageTemplate, params object[] args) => logger.LogCritical(messageTemplate, args);
 
-        [DebuggerStepThrough]
-        public static LoggerOp Begin(string messageTemplate, params object[] args) => new LoggerOp(logger, messageTemplate, args);
+    [DebuggerStepThrough]
+    public static LoggerOp Begin(string messageTemplate, params object[] args) => new LoggerOp(logger, messageTemplate, args);
 
-        [DebuggerStepThrough]
-        public static string FailIfFileDoesNotExist(string filePath)
+    [DebuggerStepThrough]
+    public static string FailIfFileDoesNotExist(string filePath)
+    {
+        if (filePath.StartsWith("http://") || filePath.StartsWith("https://"))
         {
-            if (filePath.StartsWith("http://") || filePath.StartsWith("https://"))
-            {
-                return filePath;
-            }
-            else if (!File.Exists(filePath))
-            {
-                throw new FileNotFoundException(filePath);
-            }
-            else return filePath;
+            return filePath;
         }
-
-        [DebuggerStepThrough]
-        public static Result<T> FileDoesNotExistFailure<T>(string path) => Result<T>.Failure($"The file {path} does not exist.");
-
-        [DebuggerStepThrough]
-        public static Result<T> DirectoryDoesNotExistFailure<T>(string path) => Result<T>.Failure($"The directory {path} does not exist.");
-
-        [DebuggerStepThrough]
-        public static string WarnIfFileExists(string filename)
+        else if (!File.Exists(filePath))
         {
-            if (File.Exists(filename)) Warn("File {0} exists, overwriting...", filename);
-            return filename;
+            throw new FileNotFoundException(filePath);
         }
+        else return filePath;
+    }
 
-        [DebuggerStepThrough]
-        public static string CreateIfDirectoryDoesNotExist(string dirPath)
+    [DebuggerStepThrough]
+    public static Result<T> FileDoesNotExistFailure<T>(string path) => Result<T>.Failure($"The file {path} does not exist.");
+
+    [DebuggerStepThrough]
+    public static Result<T> DirectoryDoesNotExistFailure<T>(string path) => Result<T>.Failure($"The directory {path} does not exist.");
+
+    [DebuggerStepThrough]
+    public static string WarnIfFileExists(string filename)
+    {
+        if (File.Exists(filename)) Warn("File {0} exists, overwriting...", filename);
+        return filename;
+    }
+
+    [DebuggerStepThrough]
+    public static string CreateIfDirectoryDoesNotExist(string dirPath)
+    {
+        if (!Directory.Exists(dirPath))
         {
-           if (!Directory.Exists(dirPath))
-            {
-                Directory.CreateDirectory(dirPath);
-            }
-            return dirPath;
+            Directory.CreateDirectory(dirPath);
         }
+        return dirPath;
+    }
 
-        [DebuggerStepThrough]
-        public static object? GetProp(object o, string name)
+    [DebuggerStepThrough]
+    public static object? GetProp(object o, string name)
+    {
+        PropertyInfo[] properties = o.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        return properties.FirstOrDefault(x => x.Name == name)?.GetValue(o);
+    }
+
+    private static void AppDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        Error((Exception)e.ExceptionObject, "Unhandled runtime error occurred.");   
+    }
+
+    public static Result<string> RunCmd(string cmdName, string arguments = "", string? workingDir = null, DataReceivedEventHandler? outputHandler = null, DataReceivedEventHandler? errorHandler = null,
+        bool checkExists = true, bool isNETFxTool = false, bool isNETCoreTool = false)
+    {
+        if (checkExists && !(File.Exists(cmdName) || (File.Exists(cmdName + ".exe"))|| (isNETCoreTool && File.Exists(cmdName.Replace(".exe", "")))))
         {
-            PropertyInfo[] properties = o.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            return properties.FirstOrDefault(x => x.Name == name)?.GetValue(o);
+            return FailureError<string>("The executable {0} does not exist.", cmdName);
         }
-
-        private static void AppDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        using (Process p = new Process())
         {
-            Error((Exception)e.ExceptionObject, "Unhandled runtime error occurred.");   
-        }
+            var output = new StringBuilder();
+            var error = new StringBuilder();
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardInput = false;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+            p.StartInfo.CreateNoWindow = true;
 
-        public static Result<string> RunCmd(string cmdName, string arguments = "", string? workingDir = null, DataReceivedEventHandler? outputHandler = null, DataReceivedEventHandler? errorHandler = null,
-            bool checkExists = true, bool isNETFxTool = false, bool isNETCoreTool = false)
-        {
-            if (checkExists && !(File.Exists(cmdName) || (File.Exists(cmdName + ".exe"))|| (isNETCoreTool && File.Exists(cmdName.Replace(".exe", "")))))
+            if (isNETFxTool && System.Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                return FailureError<string>("The executable {0} does not exist.", cmdName);
+                p.StartInfo.FileName = "mono";
+                p.StartInfo.Arguments = cmdName + " " + arguments;
             }
-            using (Process p = new Process())
+            else if (isNETCoreTool && System.Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                var output = new StringBuilder();
-                var error = new StringBuilder();
-                p.StartInfo.UseShellExecute = false;
-                p.StartInfo.RedirectStandardInput = false;
-                p.StartInfo.RedirectStandardOutput = true;
-                p.StartInfo.RedirectStandardError = true;
-                p.StartInfo.CreateNoWindow = true;
-
-                if (isNETFxTool && System.Environment.OSVersion.Platform == PlatformID.Unix)
-                {
-                    p.StartInfo.FileName = "mono";
-                    p.StartInfo.Arguments = cmdName + " " + arguments;
-                }
-                else if (isNETCoreTool && System.Environment.OSVersion.Platform == PlatformID.Unix)
-                {
-                    p.StartInfo.FileName = File.Exists(cmdName) ? cmdName : cmdName.Replace(".exe", "");
-                    p.StartInfo.Arguments = arguments;
-
-                }
-                else
-                {
-                    p.StartInfo.FileName = cmdName;
-                    p.StartInfo.Arguments = arguments;
-                }
-
-                p.OutputDataReceived += (sender, e) =>
-                {
-                    if (e.Data is not null)
-                    {
-                        output.AppendLine(e.Data);
-                        Debug(e.Data);
-                        outputHandler?.Invoke(sender, e);
-                    }
-                };
-                p.ErrorDataReceived += (sender, e) =>
-                {
-                    if (e.Data is not null)
-                    {
-                        error.AppendLine(e.Data);
-                        Error(e.Data);
-                        errorHandler?.Invoke(sender, e);
-                    }
-                };
-                if (workingDir is not null)
-                {
-                    p.StartInfo.WorkingDirectory = workingDir;
-                }
-                Debug("Executing cmd {0} in working directory {1}.", cmdName + " " + arguments, p.StartInfo.WorkingDirectory);
-                try
-                {
-                    p.Start();
-                    
-                    p.BeginOutputReadLine();
-                    p.BeginErrorReadLine();
-                    p.WaitForExit();
-                    return error.ToString().IsNotEmpty() ? Failure<string>(error.ToString()) : Success(output.ToString());
-                }
-                catch (Exception ex)
-                {
-                    return FailureError<string>("Error executing command {0} {1}", ex, cmdName, arguments);
-                }
-            }
-        }
-
-        public static Result<string> RunCmd(string cmdName, string arguments, byte[] input, string? workingDir = null, bool checkExists = true, bool failOnStdError = false)
-        {
-            if (checkExists && !(File.Exists(cmdName) || (File.Exists(cmdName + ".exe")) || (File.Exists(cmdName.Replace(".exe", "")))))
-            {
-                return FailureError<string>("The executable {0} does not exist.", cmdName);
-            }
-            using (Process p = new Process())
-            {
-                var output = new StringBuilder();
-                var error = new StringBuilder();
-                p.StartInfo.UseShellExecute = false;
-                p.StartInfo.RedirectStandardInput = true;
-                p.StartInfo.RedirectStandardOutput = true;
-                p.StartInfo.RedirectStandardError = true;
-                p.StartInfo.CreateNoWindow = true;                
-                p.StartInfo.FileName = cmdName;
-                p.StartInfo.Arguments = arguments;                
-                p.OutputDataReceived += (sender, e) =>
-                {
-                    if (e.Data is not null)
-                    {
-                        output.AppendLine(e.Data);
-                        Debug(e.Data);
-                    }
-                };
-                p.ErrorDataReceived += (sender, e) =>
-                {
-                    if (e.Data is not null)
-                    {
-                        error.AppendLine(e.Data);
-                        Error(e.Data);
-                    }
-                };
-                if (workingDir is not null)
-                {
-                    p.StartInfo.WorkingDirectory = workingDir;
-                }
-                Debug("Executing cmd {0} in working directory {1}.", cmdName + " " + arguments, p.StartInfo.WorkingDirectory);
-                try
-                {
-                    p.Start();
-                    using (var stdin = p.StandardInput.BaseStream)
-                    {
-                        stdin.Write(input, 0, input.Length);
-                        stdin.Flush();
-                    }
-                    p.BeginOutputReadLine();
-                    p.BeginErrorReadLine();
-                    p.WaitForExit();
-                    if (error.Length > 0 && (failOnStdError || output.Length == 0))
-                    {
-                        return Failure<string>(error.ToString());
-                    }
-                    
-                    else if (p.ExitCode != 0)
-                    { 
-                        return Failure<string>(error.ToString());
-                    }
-                    else                     
-                    {
-                        return Success(output.ToString());
-                    }   
-                    //return error.ToString().IsNotEmpty() ? Failure<string>(error.ToString()) : Success(output.ToString());
-                }
-                catch (Exception ex)
-                {
-                    return FailureError<string>("Error executing command {0} {1}", ex, cmdName, arguments);
-                }
-            }
-        }
-
-        public static async Task<Result<string>> RunCmdAsync(
-            string cmdName,
-            string arguments,
-            byte[] input,
-            string? workingDir = null,
-            bool checkExists = true,
-            bool failOnStdError = false)
-        {
-            if (checkExists && !(File.Exists(cmdName) || File.Exists(cmdName + ".exe") || File.Exists(cmdName.Replace(".exe", ""))))
-            {
-                return FailureError<string>("The executable {0} does not exist.", cmdName);
-            }
-
-            using (Process p = new Process())
-            {
-                var output = new StringBuilder();
-                var error = new StringBuilder();
-                p.StartInfo.UseShellExecute = false;
-                p.StartInfo.RedirectStandardInput = true;
-                p.StartInfo.RedirectStandardOutput = true;
-                p.StartInfo.RedirectStandardError = true;
-                p.StartInfo.CreateNoWindow = true;
-                p.StartInfo.FileName = cmdName;
+                p.StartInfo.FileName = File.Exists(cmdName) ? cmdName : cmdName.Replace(".exe", "");
                 p.StartInfo.Arguments = arguments;
 
-                p.OutputDataReceived += (sender, e) =>
+            }
+            else
+            {
+                p.StartInfo.FileName = cmdName;
+                p.StartInfo.Arguments = arguments;
+            }
+
+            p.OutputDataReceived += (sender, e) =>
+            {
+                if (e.Data is not null)
                 {
-                    if (e.Data is not null)
-                    {
-                        output.AppendLine(e.Data);
-                        Debug(e.Data);
-                    }
-                };
-                p.ErrorDataReceived += (sender, e) =>
-                {
-                    if (e.Data is not null)
-                    {
-                        error.AppendLine(e.Data);
-                        Error(e.Data);
-                    }
-                };
-                if (workingDir is not null)
-                {
-                    p.StartInfo.WorkingDirectory = workingDir;
+                    output.AppendLine(e.Data);
+                    Debug(e.Data);
+                    outputHandler?.Invoke(sender, e);
                 }
-                Debug("Executing cmd {0} in working directory {1}.", cmdName + " " + arguments, p.StartInfo.WorkingDirectory);
-                try
+            };
+            p.ErrorDataReceived += (sender, e) =>
+            {
+                if (e.Data is not null)
                 {
-                    p.Start();
-                    // Write input asynchronously
-                    using (var stdin = p.StandardInput.BaseStream)
-                    {
-                        await stdin.WriteAsync(input, 0, input.Length);
-                        await stdin.FlushAsync();
-                    }
+                    error.AppendLine(e.Data);
+                    Error(e.Data);
+                    errorHandler?.Invoke(sender, e);
+                }
+            };
+            if (workingDir is not null)
+            {
+                p.StartInfo.WorkingDirectory = workingDir;
+            }
+            Debug("Executing cmd {0} in working directory {1}.", cmdName + " " + arguments, p.StartInfo.WorkingDirectory);
+            try
+            {
+                p.Start();
                     
-                    p.BeginOutputReadLine();
-                    p.BeginErrorReadLine();
-                    await p.WaitForExitAsync();
-
-                    if (error.Length > 0 && (failOnStdError || output.Length == 0))
-                    {
-                        return Failure<string>(error.ToString());
-                    }
-                    else if (p.ExitCode != 0)
-                    {
-                        return Failure<string>(error.ToString());
-                    }
-                    else
-                    {
-                        return Success(output.ToString());
-                    }
-                }
-                catch (Exception ex)
-                {
-                    return FailureError<string>("Error executing command {0} {1}", ex, cmdName, arguments);
-                }
+                p.BeginOutputReadLine();
+                p.BeginErrorReadLine();
+                p.WaitForExit();
+                return error.ToString().IsNotEmpty() ? Failure<string>(error.ToString()) : Success(output.ToString());
+            }
+            catch (Exception ex)
+            {
+                return FailureError<string>("Error executing command {0} {1}", ex, cmdName, arguments);
             }
         }
-
-        public static void CopyDirectory(string sourceDir, string destinationDir, bool recursive = false)
-        {
-            using var op = Begin("Copying {0} to {1}", sourceDir, destinationDir);
-            // Get information about the source directory
-            var dir = new DirectoryInfo(sourceDir);
-
-            // Check if the source directory exists
-            if (!dir.Exists)
-                throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
-
-            // Cache directories before we start copying
-            DirectoryInfo[] dirs = dir.GetDirectories();
-
-            // Create the destination directory
-            Directory.CreateDirectory(destinationDir);
-
-            // Get the files in the source directory and copy to the destination directory
-            foreach (FileInfo file in dir.GetFiles())
-            {
-                string targetFilePath = Path.Combine(destinationDir, file.Name);
-                file.CopyTo(targetFilePath);
-            }
-
-            // If recursive and copying subdirectories, recursively call this method
-            if (recursive)
-            {
-                foreach (DirectoryInfo subDir in dirs)
-                {
-                    string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
-                    CopyDirectory(subDir.FullName, newDestinationDir, true);
-                }
-            }
-            op.Complete();
-        }
-
-        public static string ViewFilePath(string path, string? relativeTo = null)
-        {
-            if (!DebugEnabled)
-            {
-                if (path is null)
-                {
-                    return string.Empty;
-                }
-                else if (relativeTo is null)
-                {
-                    return (Path.GetFileName(path) ?? path);
-                }
-                else
-                {
-                    return (IOExtensions.GetRelativePath(relativeTo, path));
-                }
-            }
-            else return path;
-        }
-
-        public static bool DownloadFile(string name, Uri downloadUrl, string downloadPath)
-        {
-#pragma warning disable SYSLIB0014 // Type or member is obsolete
-            using (var op = Begin("Downloading {0} from {1} to {2}", name, downloadUrl, downloadPath))
-            {
-                WarnIfFileExists(downloadPath);
-                using (var client = new WebClient())
-                {
-                    client.DownloadProgressChanged += (object sender, DownloadProgressChangedEventArgs e) =>
-                    {
-                        Info("Received {b} bytes from of {t} for {p}.", e.BytesReceived, e.TotalBytesToReceive, downloadPath);
-                        
-                    };
-                    client.DownloadDataCompleted += (object sender, DownloadDataCompletedEventArgs e) =>
-                    {
-
-                    };
-                    client.DownloadFile(downloadUrl, downloadPath);    
-                }
-                if (File.Exists(downloadPath)) 
-                {
-                    op.Complete();
-                    return true;
-                }
-                else
-                {
-                    Error("Did not locate file at {p}.", downloadPath);
-                    return false;
-                }
-            }
-#pragma warning restore SYSLIB0014 // Type or member is obsolete
-        }
-
-        public static void VerifyNotNull(params object?[] objects)
-        {             
-            for(var i = 0; i < objects.Length;  i++)
-            {
-                if (objects[i] is null)
-                {
-                    throw new ArgumentNullException($"Object at index {i} in args is null.");
-                }
-            }
-        }
-
-        public static string RandomString(int length)
-        {
-            const string pool = "abcdefghijklmnopqrstuvwxyz0123456789";
-            var builder = new StringBuilder();
-
-            for (var i = 0; i < length; i++)
-            {
-                var c = pool[Rng.Next(0, pool.Length)];
-                builder.Append(c);
-            }
-
-            return builder.ToString();
-        }
-        #endregion
-
-        #region Fields
-        public static ILogger logger = NullLogger.Instance;   
-        public static ILoggerFactory loggerFactory = NullLoggerFactory.Instance;
-        public static ILoggerProvider loggerProvider = NullLoggerProvider.Instance; 
-        protected static object __lock = new object();
-        #endregion
     }
+
+    public static Result<string> RunCmd(string cmdName, string arguments, byte[] input, string? workingDir = null, bool checkExists = true, bool failOnStdError = false)
+    {
+        if (checkExists && !(File.Exists(cmdName) || (File.Exists(cmdName + ".exe")) || (File.Exists(cmdName.Replace(".exe", "")))))
+        {
+            return FailureError<string>("The executable {0} does not exist.", cmdName);
+        }
+        using (Process p = new Process())
+        {
+            var output = new StringBuilder();
+            var error = new StringBuilder();
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardInput = true;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+            p.StartInfo.CreateNoWindow = true;                
+            p.StartInfo.FileName = cmdName;
+            p.StartInfo.Arguments = arguments;                
+            p.OutputDataReceived += (sender, e) =>
+            {
+                if (e.Data is not null)
+                {
+                    output.AppendLine(e.Data);
+                    Debug(e.Data);
+                }
+            };
+            p.ErrorDataReceived += (sender, e) =>
+            {
+                if (e.Data is not null)
+                {
+                    error.AppendLine(e.Data);
+                    Error(e.Data);
+                }
+            };
+            if (workingDir is not null)
+            {
+                p.StartInfo.WorkingDirectory = workingDir;
+            }
+            Debug("Executing cmd {0} in working directory {1}.", cmdName + " " + arguments, p.StartInfo.WorkingDirectory);
+            try
+            {
+                p.Start();
+                using (var stdin = p.StandardInput.BaseStream)
+                {
+                    stdin.Write(input, 0, input.Length);
+                    stdin.Flush();
+                }
+                p.BeginOutputReadLine();
+                p.BeginErrorReadLine();
+                p.WaitForExit();
+                if (error.Length > 0 && (failOnStdError || output.Length == 0))
+                {
+                    return Failure<string>(error.ToString());
+                }
+                    
+                else if (p.ExitCode != 0)
+                { 
+                    return Failure<string>(error.ToString());
+                }
+                else                     
+                {
+                    return Success(output.ToString());
+                }   
+                //return error.ToString().IsNotEmpty() ? Failure<string>(error.ToString()) : Success(output.ToString());
+            }
+            catch (Exception ex)
+            {
+                return FailureError<string>("Error executing command {0} {1}", ex, cmdName, arguments);
+            }
+        }
+    }
+
+    public static async Task<Result<string>> RunCmdAsync(
+        string cmdName,
+        string arguments,
+        byte[] input,
+        string? workingDir = null,
+        bool checkExists = true,
+        bool failOnStdError = false)
+    {
+        if (checkExists && !(File.Exists(cmdName) || File.Exists(cmdName + ".exe") || File.Exists(cmdName.Replace(".exe", ""))))
+        {
+            return FailureError<string>("The executable {0} does not exist.", cmdName);
+        }
+
+        using (Process p = new Process())
+        {
+            var output = new StringBuilder();
+            var error = new StringBuilder();
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardInput = true;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+            p.StartInfo.CreateNoWindow = true;
+            p.StartInfo.FileName = cmdName;
+            p.StartInfo.Arguments = arguments;
+
+            p.OutputDataReceived += (sender, e) =>
+            {
+                if (e.Data is not null)
+                {
+                    output.AppendLine(e.Data);
+                    Debug(e.Data);
+                }
+            };
+            p.ErrorDataReceived += (sender, e) =>
+            {
+                if (e.Data is not null)
+                {
+                    error.AppendLine(e.Data);
+                    Error(e.Data);
+                }
+            };
+            if (workingDir is not null)
+            {
+                p.StartInfo.WorkingDirectory = workingDir;
+            }
+            Debug("Executing cmd {0} in working directory {1}.", cmdName + " " + arguments, p.StartInfo.WorkingDirectory);
+            try
+            {
+                p.Start();
+                // Write input asynchronously
+                using (var stdin = p.StandardInput.BaseStream)
+                {
+                    await stdin.WriteAsync(input, 0, input.Length);
+                    await stdin.FlushAsync();
+                }
+                    
+                p.BeginOutputReadLine();
+                p.BeginErrorReadLine();
+                await p.WaitForExitAsync();
+
+                if (error.Length > 0 && (failOnStdError || output.Length == 0))
+                {
+                    return Failure<string>(error.ToString());
+                }
+                else if (p.ExitCode != 0)
+                {
+                    return Failure<string>(error.ToString());
+                }
+                else
+                {
+                    return Success(output.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                return FailureError<string>("Error executing command {0} {1}", ex, cmdName, arguments);
+            }
+        }
+    }
+
+    public static void CopyDirectory(string sourceDir, string destinationDir, bool recursive = false)
+    {
+        using var op = Begin("Copying {0} to {1}", sourceDir, destinationDir);
+        // Get information about the source directory
+        var dir = new DirectoryInfo(sourceDir);
+
+        // Check if the source directory exists
+        if (!dir.Exists)
+            throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
+
+        // Cache directories before we start copying
+        DirectoryInfo[] dirs = dir.GetDirectories();
+
+        // Create the destination directory
+        Directory.CreateDirectory(destinationDir);
+
+        // Get the files in the source directory and copy to the destination directory
+        foreach (FileInfo file in dir.GetFiles())
+        {
+            string targetFilePath = Path.Combine(destinationDir, file.Name);
+            file.CopyTo(targetFilePath);
+        }
+
+        // If recursive and copying subdirectories, recursively call this method
+        if (recursive)
+        {
+            foreach (DirectoryInfo subDir in dirs)
+            {
+                string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
+                CopyDirectory(subDir.FullName, newDestinationDir, true);
+            }
+        }
+        op.Complete();
+    }
+
+    public static string ViewFilePath(string path, string? relativeTo = null)
+    {
+        if (!DebugEnabled)
+        {
+            if (path is null)
+            {
+                return string.Empty;
+            }
+            else if (relativeTo is null)
+            {
+                return (Path.GetFileName(path) ?? path);
+            }
+            else
+            {
+                return (IOExtensions.GetRelativePath(relativeTo, path));
+            }
+        }
+        else return path;
+    }
+
+    public static bool DownloadFile(string name, Uri downloadUrl, string downloadPath)
+    {
+#pragma warning disable SYSLIB0014 // Type or member is obsolete
+        using (var op = Begin("Downloading {0} from {1} to {2}", name, downloadUrl, downloadPath))
+        {
+            WarnIfFileExists(downloadPath);
+            using (var client = new WebClient())
+            {
+                client.DownloadProgressChanged += (object sender, DownloadProgressChangedEventArgs e) =>
+                {
+                    Info("Received {b} bytes from of {t} for {p}.", e.BytesReceived, e.TotalBytesToReceive, downloadPath);
+                        
+                };
+                client.DownloadDataCompleted += (object sender, DownloadDataCompletedEventArgs e) =>
+                {
+
+                };
+                client.DownloadFile(downloadUrl, downloadPath);    
+            }
+            if (File.Exists(downloadPath)) 
+            {
+                op.Complete();
+                return true;
+            }
+            else
+            {
+                Error("Did not locate file at {p}.", downloadPath);
+                return false;
+            }
+        }
+#pragma warning restore SYSLIB0014 // Type or member is obsolete
+    }
+
+    public static void VerifyNotNull(params object?[] objects)
+    {             
+        for(var i = 0; i < objects.Length;  i++)
+        {
+            if (objects[i] is null)
+            {
+                throw new ArgumentNullException($"Object at index {i} in args is null.");
+            }
+        }
+    }
+
+    public static string RandomString(int length)
+    {
+        const string pool = "abcdefghijklmnopqrstuvwxyz0123456789";
+        var builder = new StringBuilder();
+
+        for (var i = 0; i < length; i++)
+        {
+            var c = pool[Rng.Next(0, pool.Length)];
+            builder.Append(c);
+        }
+
+        return builder.ToString();
+    }
+    #endregion
+
+    #region Fields
+    public static ILogger logger = NullLogger.Instance;   
+    public static ILoggerFactory loggerFactory = NullLoggerFactory.Instance;
+    public static ILoggerProvider loggerProvider = NullLoggerProvider.Instance; 
+    protected static object __lock = new object();
+    #endregion
 }

@@ -935,7 +935,7 @@ namespace OnlyHumans.Acp
         /// <br/>Note: in future versions of the protocol, this will be required.
         /// </summary>
         [Newtonsoft.Json.JsonProperty("clientInfo", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public ClientInfo ClientInfo { get; set; }
+        public Implementation? ClientInfo { get; set; }
 
         /// <summary>
         /// The latest protocol version supported by the client.

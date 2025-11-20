@@ -2,8 +2,7 @@
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using OnlyHumans;
-
+   
     // Agent interface: methods the Client can call on the Agent
     public interface IAgent
     {

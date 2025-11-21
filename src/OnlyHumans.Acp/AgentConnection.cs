@@ -2,24 +2,26 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
-
+using Nerdbank.Streams;
 using Newtonsoft.Json;
 using StreamJsonRpc;
 using StreamJsonRpc.Protocol;
-
 using static Result;
 
-public class AgentConnection : Runtime, IAgent
+public class AgentConnection : Runtime, IAgent, IJsonRpcMessageHandler
 {
-    public AgentConnection(IClient client, string cmd, string? workingDirectory = null, params string[] arguments)
+    public AgentConnection(IClient client, string cmd, string? arguments = null, string? workingDirectory = null, TraceListener? traceListener = null)
     {
         this.client = client;
-        this.cmdLine = cmd + " " + arguments.JoinWith(" ");  
+        this.cmdLine = cmd + " " + arguments;  
         psi = new ProcessStartInfo();
-        psi.FileName = cmd;        
-        psi.Arguments = arguments.JoinWith(" ");    
+        psi.FileName = cmd;
+        psi.Arguments = arguments;
         psi.WorkingDirectory = workingDirectory ?? AssemblyLocation;
+        psi.StandardOutputEncoding = System.Text.Encoding.UTF8;
+        psi.StandardInputEncoding = System.Text.Encoding.UTF8;  
         psi.RedirectStandardInput = true;
         psi.RedirectStandardOutput = true;
         psi.UseShellExecute = false;
@@ -31,6 +33,8 @@ public class AgentConnection : Runtime, IAgent
         {
             Info("Agent subprocess {0} exited.", cmd);
         };
+        
+        /*
         process.OutputDataReceived += (sender, e) =>
         {
             if (!string.IsNullOrEmpty(e.Data))
@@ -45,9 +49,13 @@ public class AgentConnection : Runtime, IAgent
                 Error("Agent subprocess {0} error: {1}", cmd, e.Data);
             }
         };
+          */     
         process.Start();
-        jsonrpc = new JsonRpc(process.StandardInput.BaseStream, process.StandardOutput.BaseStream);
-        // Register client methods from meta.json
+        jsonrpc = new JsonRpc(FullDuplexStream.Splice(process.StandardOutput.BaseStream, process.StandardInput.BaseStream));
+        jsonrpc.TraceSource.Switch.Level = SourceLevels.Verbose;
+        if (traceListener != null) jsonrpc.TraceSource.Listeners.Add(traceListener);
+
+        // Register client methods                
         jsonrpc.AddLocalRpcMethod("fs/read_text_file", client.ReadTextFileAsync);
         jsonrpc.AddLocalRpcMethod("fs/write_text_file", client.WriteTextFileAsync);
         jsonrpc.AddLocalRpcMethod("session/request_permission", client.RequestPermissionAsync);
@@ -57,12 +65,14 @@ public class AgentConnection : Runtime, IAgent
         jsonrpc.AddLocalRpcMethod("terminal/output", client.TerminalOutputAsync);
         jsonrpc.AddLocalRpcMethod("terminal/release", client.ReleaseTerminalAsync);
         jsonrpc.AddLocalRpcMethod("terminal/wait_for_exit", client.WaitForTerminalExitAsync);
-        jsonrpc.StartListening();
+
+        jsonrpc.StartListening();               
     }
 
     #region Methods
 
     #region IAgent Implementation
+    
     public async Task<Result<InitializeResponse>> InitializeAsync(InitializeRequest request)
        => await ExecuteAsync(jsonrpc.InvokeAsync<InitializeResponse>("initialize", request));
 
@@ -97,11 +107,41 @@ public class AgentConnection : Runtime, IAgent
     #endregion
 
     #region Fields
-    IClient client;
-    public string cmdLine;
-    protected ProcessStartInfo psi;
-    protected Process process;
+    public readonly IClient client;
+    public readonly string cmdLine;
+    protected readonly ProcessStartInfo psi;
+    protected readonly Process process;
     JsonRpc jsonrpc;
     #endregion
+
+    // IJsonRpcMessageHandler implementation
+    public  async ValueTask WriteAsync(JsonRpcMessage message, CancellationToken token)
+    {
+        Interlocked.Increment(ref busy);    
+        //using var writer = new StreamWriter(process.StandardInput.BaseStream, psi.StandardInputEncoding, leaveOpen: true);
+        await process.StandardInput.WriteLineAsync(JsonConvert.SerializeObject(message));
+        await process.StandardInput.FlushAsync();
+        process.StandardInput.Close();
+        Interlocked.Decrement(ref busy);
+
+    }
+
+    public async ValueTask<JsonRpcMessage> ReadAsync(CancellationToken token)
+    {
+        Interlocked.Increment(ref busy);    
+        //using var reader = new StreamReader(process.StandardOutput.BaseStream, psi.StandardOutputEncoding, leaveOpen: true);
+        var s = await process.StandardOutput.ReadLineAsync();
+
+        Interlocked.Decrement(ref busy);
+        return JsonConvert.DeserializeObject<JsonRpcMessage>(s);
+    }
+
+    public bool CanRead => !process.HasExited && Interlocked.Read(ref busy) == 0 && process.StandardOutput.BaseStream.CanRead;
+
+    public bool CanWrite => !process.HasExited && Interlocked.Read(ref busy) == 0 && process.StandardInput.BaseStream.CanWrite;
+
+    public IJsonRpcMessageFormatter Formatter { get; } = new JsonMessageFormatter();
+
+    public long busy = 0;
 }
 

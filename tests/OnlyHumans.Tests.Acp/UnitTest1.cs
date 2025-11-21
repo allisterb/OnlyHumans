@@ -1,15 +1,16 @@
 using OnlyHumans.Acp;
+using System.Diagnostics;
 
 namespace OnlyHumans.Tests.Acp;
 
 public class UnitTest1
 {
     [Fact]
-    public async void Test1()
+    public async Task Test1()
     {
 
         var c = new Client("TestClient", "1.0", 1, ClientCapabilities.Default);
-        var ac = new AgentConnection(c, "cmd.exe", "C:\\DevTools\\gemini", "/c gemini-cli.bat --experimental-acp");
+        
         var r = await ac.InitializeAsync(new InitializeRequest
         {
             ClientCapabilities = ClientCapabilities.Default,
@@ -20,6 +21,7 @@ public class UnitTest1
             },
             ProtocolVersion = 1
         });
+        
         Assert.True(r.IsSuccess);
     }
 }

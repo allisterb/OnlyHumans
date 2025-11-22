@@ -6,7 +6,7 @@
     // Agent interface: methods the Client can call on the Agent
     public interface IAgent
     {
-        Task<Result<InitializeResponse>> InitializeAsync(InitializeRequest request);
+        Task<Result<InitializeResponse>> InitializeAsync(InitializeRequest request, CancellationToken cancellationToken);
         Task<Result<AuthenticateResponse>> AuthenticateAsync(AuthenticateRequest request);
         Task<Result<NewSessionResponse>> NewSessionAsync(NewSessionRequest request);
         Task<Result<LoadSessionResponse>> LoadSessionAsync(LoadSessionRequest request);

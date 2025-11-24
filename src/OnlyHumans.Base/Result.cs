@@ -26,6 +26,18 @@ public struct Result<T>
         return IsSuccess;
     }
 
+    public Result<U> Map<U>(Func<T, U> func)
+    {
+        if (IsSuccess)
+        {
+            return Result<U>.Success(func(Value));
+        }
+        else
+        {
+            return Result<U>.Failure(Message, Exception);
+        }
+    }
+
     public static Result<T> Success(T value) => new Result<T>(ResultType.Success, value);
 
     public static Result<T> Failure(string? message, Exception? exception = null) => new Result<T>(ResultType.Failure, message: message, exception: exception);
@@ -124,7 +136,7 @@ public static class Result
 
     public static async Task<T> ResultOrFail<T>(Task<Result<T>> result) => (await result).IsSuccess ? result.Result.Value : throw new Exception("The operation failed: " + result.Result.Message, result.Result.Exception);
 
-    public static bool Succedeed<T>(Result<T> result, out Result<T> r)
+    public static bool Succeeded<T>(Result<T> result, out Result<T> r)
     {
         r = result;
         return r.IsSuccess;

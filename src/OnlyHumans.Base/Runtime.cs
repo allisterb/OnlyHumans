@@ -47,9 +47,9 @@ public abstract class Runtime
 
     public static string UserHomeDir => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-    public static string AppDataDir => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+    public static string AppDataDir => Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
-    public static string OnlyHumansDevDir => Path.Combine(AppDataDir, "OnlyHumansDev");
+    public static string OnlyHumansDir => Path.Combine(AppDataDir, "OnlyHumans");
 
     public static Random Rng { get; } = new Random();
 

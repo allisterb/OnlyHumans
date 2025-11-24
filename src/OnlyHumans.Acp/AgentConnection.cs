@@ -1,87 +1,100 @@
 ﻿namespace OnlyHumans.Acp;
 
-using Microsoft;
 using Nerdbank.Streams;
-using Newtonsoft.Json;
 using StreamJsonRpc;
-using StreamJsonRpc.Protocol;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using static Result;
 
-public class AgentConnection : Runtime, IDisposable, IAgent
+public class AgentConnection : Runtime, IDisposable, IAgentConnection
 {
-    public AgentConnection(IClient client, string cmd, string? arguments = null, string? workingDirectory = null, TraceListener? traceListener = null, bool monitor = false)
-    {
-        this.client = client;
-        this.cmdLine = cmd + " " + arguments;  
-        psi = new ProcessStartInfo();
-        psi.FileName = cmd;
-        psi.Arguments = arguments;
-        psi.WorkingDirectory = workingDirectory ?? AssemblyLocation;
-        psi.StandardOutputEncoding = System.Text.Encoding.UTF8;
-        psi.StandardInputEncoding = System.Text.Encoding.UTF8;          
-        psi.RedirectStandardInput = true;
-        psi.RedirectStandardOutput = true;
-        psi.UseShellExecute = false;
-        psi.CreateNoWindow = true;
-        process = new Process();
-        process.StartInfo = psi;
-        process.EnableRaisingEvents = true;
+    #region Constructors
+    public AgentConnection(string cmd, string? arguments = null, string? workingDirectory = null, SourceLevels traceLevel = SourceLevels.Information, TraceListener? traceListener = null, bool monitorIO = false)
+    {                
+        this.cmdLine = cmd + " " + arguments;
+        psi = new ProcessStartInfo()
+        {
+            FileName = cmd,
+            Arguments = arguments,
+            WorkingDirectory = workingDirectory ?? AssemblyLocation,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardInputEncoding = Encoding.UTF8,
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+        process = new Process()
+        {
+            StartInfo = psi,
+            EnableRaisingEvents = true,
+        };
         process.Exited += (e, args) =>
         {
             Info("Agent subprocess {0} exited.", cmd);
         };
         process.Start();
-
-        var ostream = process.StandardInput.BaseStream;
+        
         var istream = process.StandardOutput.BaseStream;
-        if (monitor)
+        var ostream = process.StandardInput.BaseStream;        
+        if (monitorIO)
         {
-            var monitoringStream = new MonitoringStream(process.StandardOutput.BaseStream);
-            var monitoringStream2 = new MonitoringStream(process.StandardInput.BaseStream);
-            incomingData = new List<byte>();
-            outgoingData = new List<byte>();
-
-            monitoringStream.DidReadAny += (s, span) =>
+            var imonitoringStream = new MonitoringStream(process.StandardOutput.BaseStream);
+            var omonitoringStream = new MonitoringStream(process.StandardInput.BaseStream);            
+            incomingData = new StringBuilder();
+            outgoingData = new StringBuilder();
+            imonitoringStream.DidReadAny += (s, span) =>
             {
-                incomingData.AddRange(span);
+                incomingData.Append(Encoding.UTF8.GetString(span));
             };
 
-            monitoringStream2.DidWriteAny += (s, span) =>
+            omonitoringStream.DidWriteAny += (s, span) =>
             {
-
-                outgoingData.AddRange(span);
+                outgoingData.Append(Encoding.UTF8.GetString(span));
             };
-            ostream = monitoringStream2;
-            istream = monitoringStream;
-            
+            istream = imonitoringStream;
+            ostream = omonitoringStream;                        
         }
 
         jsonrpc = new JsonRpc(new NewLineDelimitedMessageHandler(ostream, istream, new JsonMessageFormatter()));
-        jsonrpc.TraceSource.Switch.Level = SourceLevels.Verbose;    
+        jsonrpc.TraceSource.Switch.Level = traceLevel;    
         if (traceListener != null) jsonrpc.TraceSource.Listeners.Add(traceListener);
-
-        // Register client methods                
-        jsonrpc.AddLocalRpcMethod("fs/read_text_file", client.ReadTextFileAsync);
-        jsonrpc.AddLocalRpcMethod("fs/write_text_file", client.WriteTextFileAsync);
-        jsonrpc.AddLocalRpcMethod("session/request_permission", client.RequestPermissionAsync);
-        jsonrpc.AddLocalRpcMethod("session/update", client.SessionUpdateAsync);
-        jsonrpc.AddLocalRpcMethod("terminal/create", client.CreateTerminalAsync);
-        jsonrpc.AddLocalRpcMethod("terminal/kill", client.KillTerminalCommandAsync);
-        jsonrpc.AddLocalRpcMethod("terminal/output", client.TerminalOutputAsync);
-        jsonrpc.AddLocalRpcMethod("terminal/release", client.ReleaseTerminalAsync);
-        jsonrpc.AddLocalRpcMethod("terminal/wait_for_exit", client.WaitForTerminalExitAsync);
-    
+        
+        // Register client methods
+        jsonrpc.AddLocalRpcMethod("fs/read_text_file", ClientReadTextFileAsync);        
+        jsonrpc.AddLocalRpcMethod("fs/write_text_file", ClientWriteTextFileAsync);
+        jsonrpc.AddLocalRpcMethod("session/request_permission", ClientRequestPermissionAsync);
+        jsonrpc.AddLocalRpcMethod("session/update", ClientSessionUpdateAsync);
+        jsonrpc.AddLocalRpcMethod("terminal/create", ClientCreateTerminalAsync);
+        jsonrpc.AddLocalRpcMethod("terminal/kill", ClientKillTerminalCommandAsync);
+        jsonrpc.AddLocalRpcMethod("terminal/output", ClientTerminalOutputAsync);
+        jsonrpc.AddLocalRpcMethod("terminal/release",ClientReleaseTerminalAsync);
+        jsonrpc.AddLocalRpcMethod("terminal/wait_for_exit", ClientWaitForTerminalExitAsync);    
+        
         jsonrpc.StartListening();               
     }
+    #endregion
+
+    #region Events
+    public event ClientEventHandlerAsync<RequestPermissionRequest, RequestPermissionResponse>? RequestPermissionAsync;
+    public event ClientEventHandlerAsync<CreateTerminalRequest, CreateTerminalResponse>? CreateTerminalAsync;
+    public event ClientEventHandlerAsync<KillTerminalCommandRequest, KillTerminalCommandResponse>? KillTerminalCommandAsync;
+    public event ClientEventHandlerAsync<ReleaseTerminalRequest, ReleaseTerminalResponse>? ReleaseTerminalAsync;
+    public event ClientEventHandlerAsync<TerminalOutputRequest, TerminalOutputResponse>? TerminalOutputAsync;
+    public event ClientEventHandlerAsync<WaitForTerminalExitRequest, WaitForTerminalExitResponse>? WaitForTerminalExitAsync;
+    public event ClientEventHandlerAsync<ReadTextFileRequest, ReadTextFileResponse>? ReadTextFileAsync;
+    public event ClientEventHandlerAsync<WriteTextFileRequest, WriteTextFileResponse>? WriteTextFileAsync;
+    public event ClientEventHandlerAsync<Dictionary<string, object>, Dictionary<string, object>>? ClientExtMethodAsync;
+    public event ClientEventHandlerAsync<Dictionary<string, object>, Dictionary<string, object>>? ClientExtNotificationAsync;
+    public event ClientEventHandlerAsync<SessionNotification>? SessionUpdateAsync;
+    #endregion
 
     #region Methods
 
-    #region IAgent Implementation
-    
+    #region Agent Methods
     public async Task<Result<InitializeResponse>> InitializeAsync(InitializeRequest request, CancellationToken cancellationToken = default)
        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<InitializeResponse>("initialize", request, cancellationToken));
 
@@ -113,12 +126,45 @@ public class AgentConnection : Runtime, IDisposable, IAgent
         => await jsonrpc.NotifyAsync(notification, parameters);
     #endregion
 
-    
+    #region Client Methods
+
+    public Task ClientSessionUpdateAsync(SessionNotification request)
+        => SessionUpdateAsync?.Invoke(this, new ClientEventArgs<SessionNotification>("SessionUpdate", request)) ?? Task.FromException(new NotImplementedException());
+
+    public Task<RequestPermissionResponse> ClientRequestPermissionAsync(RequestPermissionRequest request)
+        => RequestPermissionAsync?.Invoke(this, new ClientEventArgs<RequestPermissionRequest>("RequestPermission", request)) ?? Task.FromException<RequestPermissionResponse>(new NotImplementedException());
+
+    public Task<CreateTerminalResponse> ClientCreateTerminalAsync(CreateTerminalRequest request)
+        => CreateTerminalAsync?.Invoke(this, new ClientEventArgs<CreateTerminalRequest>("CreateTerminal", request)) ?? Task.FromException<CreateTerminalResponse>(new NotImplementedException());
+
+    public Task<KillTerminalCommandResponse> ClientKillTerminalCommandAsync(KillTerminalCommandRequest request)
+        => KillTerminalCommandAsync?.Invoke(this, new ClientEventArgs<KillTerminalCommandRequest>("KillTerminalCommand", request)) ?? Task.FromException<KillTerminalCommandResponse>(new NotImplementedException());
+
+    public Task<ReleaseTerminalResponse> ClientReleaseTerminalAsync(ReleaseTerminalRequest request)
+        => ReleaseTerminalAsync?.Invoke(this, new ClientEventArgs<ReleaseTerminalRequest>("ReleaseTerminal", request)) ?? Task.FromException<ReleaseTerminalResponse>(new NotImplementedException());
+
+    public Task<TerminalOutputResponse> ClientTerminalOutputAsync(TerminalOutputRequest request)
+        => TerminalOutputAsync?.Invoke(this, new ClientEventArgs<TerminalOutputRequest>("TerminalOutput", request)) ?? Task.FromException<TerminalOutputResponse>(new NotImplementedException());
+
+    public Task<WaitForTerminalExitResponse> ClientWaitForTerminalExitAsync(WaitForTerminalExitRequest request)
+        => WaitForTerminalExitAsync?.Invoke(this, new ClientEventArgs<WaitForTerminalExitRequest>("WaitForTerminalExit", request)) ?? Task.FromException<WaitForTerminalExitResponse>(new NotImplementedException());
+
+    public Task<ReadTextFileResponse> ClientReadTextFileAsync(ReadTextFileRequest request)
+        => ReadTextFileAsync?.Invoke(this, new ClientEventArgs<ReadTextFileRequest>("ReadTextFile2", request)) ?? Task.FromException<ReadTextFileResponse>(new NotImplementedException());
+
+    public Task<WriteTextFileResponse> ClientWriteTextFileAsync(WriteTextFileRequest request)
+        => WriteTextFileAsync?.Invoke(this, new ClientEventArgs<WriteTextFileRequest>("WriteTextFile", request)) ?? Task.FromException<WriteTextFileResponse>(new NotImplementedException());
+
+    public Task<Dictionary<string, object>> ClientExtMethodAsync(Dictionary<string, object> parameters)
+        => ClientExtMethodAsync?.Invoke(this, new ClientEventArgs<Dictionary<string, object>>("ClientExtMethod", parameters)) ?? Task.FromException<Dictionary<string, object>>(new NotImplementedException());
+
+    public Task<Dictionary<string, object>> ClientExtNotificationAsync(Dictionary<string, object> parameters)
+        => ClientExtNotificationAsync?.Invoke(this, new ClientEventArgs<Dictionary<string, object>>("ClientExtNotification", parameters)) ?? Task.FromException<Dictionary<string, object>>(new NotImplementedException());
+
+    #endregion
+
+
     public void Stop()
-    {
-        process.Kill(); 
-    }   
-    public void Dispose()
     {
         try
         {
@@ -129,24 +175,29 @@ public class AgentConnection : Runtime, IDisposable, IAgent
         }
         catch (Exception ex)
         {
-            Error("Error disposing AgentConnection: {0}", ex.Message);
+            Error("Error killing process {0}: {1}.", cmdLine, ex.Message);
         }
+    }   
+
+    public void Dispose()
+    {
+        Stop(); 
         jsonrpc.Dispose();
         process.Dispose();
     }
     #endregion
 
     #region Fields
-    public readonly IClient client;
-    public readonly string cmdLine;
     protected readonly ProcessStartInfo psi;
-    public readonly Process process;
-    public List<byte>? incomingData;
-    public List<byte>? outgoingData;
-    protected JsonRpc jsonrpc;
-
+    protected readonly Process process;
+    protected readonly JsonRpc jsonrpc;
+   
+    public readonly string cmdLine;
+    public readonly StringBuilder? incomingData;
+    public readonly StringBuilder? outgoingData;
     #endregion
 
-   
+    
+
 }
 

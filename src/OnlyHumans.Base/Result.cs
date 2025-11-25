@@ -53,6 +53,9 @@ public struct Result<T>
             return Failure(errorMessage, ex);
         }
     }
+
+    
+
     public ResultType Type;
     public T? _Value;
     public string? Message;
@@ -132,6 +135,19 @@ public static class Result
         return r;
     }
 
+    public static async Task<Result<None>> ExecuteAsync(Task task, string? errorMessage = null)
+    {
+        try
+        {
+            await task;
+            return Result<None>.Success(None.Value);
+        }
+        catch (Exception ex)
+        {
+            return Result<None>.Failure(errorMessage, ex);
+        }
+    }
+
     public static T ResultOrFail<T>(Result<T> result) => result.IsSuccess ? result.Value : throw new Exception("The operation failed: " + result.Message, result.Exception);
 
     public static async Task<T> ResultOrFail<T>(Task<Result<T>> result) => (await result).IsSuccess ? result.Result.Value : throw new Exception("The operation failed: " + result.Result.Message, result.Result.Exception);
@@ -143,3 +159,26 @@ public static class Result
     }
 }
 
+public static class  ResultExtensions
+{
+    public static Task<Result<U>> Map<T, U>(this Task<Result<T>> resultTask, Func<T, U> func)
+    {
+        return resultTask.ContinueWith(t =>
+        {
+            var result = t.Result;
+            if (result.IsSuccess)
+            {
+                return Result<U>.Success(func(result.Value));
+            }
+            else
+            {
+                return Result<U>.Failure(result.Message, result.Exception);
+            }
+        });
+    }
+
+}
+public struct None
+{
+    public static readonly None Value = new None(); 
+}

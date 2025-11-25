@@ -25,5 +25,6 @@ public class AgentConnectionTests
         }, token);
         
         Assert.True(r.IsSuccess);
+        ac.Dispose();
     }
 }

@@ -1,13 +1,14 @@
 ﻿namespace OnlyHumans.Acp;
 
-using Nerdbank.Streams;
-using StreamJsonRpc;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using static Result;
+
+using Nerdbank.Streams;
+using StreamJsonRpc;
 
 public class AgentConnection : Runtime, IDisposable, IAgentConnection
 {
@@ -64,7 +65,7 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
         if (traceListener != null) jsonrpc.TraceSource.Listeners.Add(traceListener);
         
         // Register client methods
-        jsonrpc.AddLocalRpcMethod("fs/read_text_file", ClientReadTextFileAsync);        
+        jsonrpc.AddLocalRpcMethod("fs/read_text_file", ClientSessionUpdateAsync);        
         jsonrpc.AddLocalRpcMethod("fs/write_text_file", ClientWriteTextFileAsync);
         jsonrpc.AddLocalRpcMethod("session/request_permission", ClientRequestPermissionAsync);
         jsonrpc.AddLocalRpcMethod("session/update", ClientSessionUpdateAsync);
@@ -77,21 +78,7 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
         jsonrpc.StartListening();               
     }
     #endregion
-
-    #region Events
-    public event ClientEventHandlerAsync<RequestPermissionRequest, RequestPermissionResponse>? RequestPermissionAsync;
-    public event ClientEventHandlerAsync<CreateTerminalRequest, CreateTerminalResponse>? CreateTerminalAsync;
-    public event ClientEventHandlerAsync<KillTerminalCommandRequest, KillTerminalCommandResponse>? KillTerminalCommandAsync;
-    public event ClientEventHandlerAsync<ReleaseTerminalRequest, ReleaseTerminalResponse>? ReleaseTerminalAsync;
-    public event ClientEventHandlerAsync<TerminalOutputRequest, TerminalOutputResponse>? TerminalOutputAsync;
-    public event ClientEventHandlerAsync<WaitForTerminalExitRequest, WaitForTerminalExitResponse>? WaitForTerminalExitAsync;
-    public event ClientEventHandlerAsync<ReadTextFileRequest, ReadTextFileResponse>? ReadTextFileAsync;
-    public event ClientEventHandlerAsync<WriteTextFileRequest, WriteTextFileResponse>? WriteTextFileAsync;
-    public event ClientEventHandlerAsync<Dictionary<string, object>, Dictionary<string, object>>? ClientExtMethodAsync;
-    public event ClientEventHandlerAsync<Dictionary<string, object>, Dictionary<string, object>>? ClientExtNotificationAsync;
-    public event ClientEventHandlerAsync<SessionNotification>? SessionUpdateAsync;
-    #endregion
-
+ 
     #region Methods
 
     #region Agent Methods
@@ -99,70 +86,69 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<InitializeResponse>("initialize", request, cancellationToken));
 
     public async Task<Result<AuthenticateResponse>> AuthenticateAsync(AuthenticateRequest request)
-        => await ExecuteAsync(jsonrpc.InvokeAsync<AuthenticateResponse>("authenticate", request));
+        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<AuthenticateResponse>("authenticate", request));
 
     public async Task<Result<NewSessionResponse>> NewSessionAsync(NewSessionRequest request)
-        => await ExecuteAsync(jsonrpc.InvokeAsync<NewSessionResponse>("session/new", request));
+        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<NewSessionResponse>("session/new", request));
 
     public async Task<Result<LoadSessionResponse>> LoadSessionAsync(LoadSessionRequest request)
-        => await ExecuteAsync(jsonrpc.InvokeAsync<LoadSessionResponse>("session/load", request));
+        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<LoadSessionResponse>("session/load", request));
 
     public async Task<Result<PromptResponse>> PromptAsync(PromptRequest request)
-        => await ExecuteAsync(jsonrpc.InvokeAsync<PromptResponse>("session/prompt", request));
+        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<PromptResponse>("session/prompt", request));
 
     public async Task<Result<SetSessionModeResponse>> SetSessionModeAsync(SetSessionModeRequest request)
-        => await ExecuteAsync(jsonrpc.InvokeAsync<SetSessionModeResponse>("session/set_mode", request));
+        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<SetSessionModeResponse>("session/set_mode", request));
 
     public async Task<Result<SetSessionModelResponse>> SetSessionModelAsync(SetSessionModelRequest request)
-        => await ExecuteAsync(jsonrpc.InvokeAsync<SetSessionModelResponse>("session/set_model", request));
+        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<SetSessionModelResponse>("session/set_model", request));
 
     public async Task CancelNotificationAsync(CancelNotification notification)
         => await jsonrpc.NotifyAsync("session/cancel", notification);
 
     public async Task<Result<Dictionary<string, object>>> ExtMethodAsync(string method, Dictionary<string, object>? parameters = null)
-        => await ExecuteAsync(jsonrpc.InvokeAsync<Dictionary<string, object>>(method, parameters));
+        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<Dictionary<string, object>>(method, parameters));
 
-    public async Task ExtNotificationAsync(string notification, Dictionary<string, object>? parameters = null)
-        => await jsonrpc.NotifyAsync(notification, parameters);
+    public async Task<Result<None>> ExtNotificationAsync(string notification, Dictionary<string, object>? parameters = null)
+        => await ExecuteAsync(jsonrpc.NotifyAsync(notification, parameters));
     #endregion
 
     #region Client Methods
 
     public Task ClientSessionUpdateAsync(SessionNotification request)
-        => SessionUpdateAsync?.Invoke(this, new ClientEventArgs<SessionNotification>("SessionUpdate", request)) ?? Task.FromException(new NotImplementedException());
+        => SessionUpdateAsync?.Invoke(request) ?? Task.FromException<RequestPermissionResponse>(new NotImplementedException());
 
     public Task<RequestPermissionResponse> ClientRequestPermissionAsync(RequestPermissionRequest request)
-        => RequestPermissionAsync?.Invoke(this, new ClientEventArgs<RequestPermissionRequest>("RequestPermission", request)) ?? Task.FromException<RequestPermissionResponse>(new NotImplementedException());
+        => RequestPermissionAsync?.Invoke(request) ?? Task.FromException<RequestPermissionResponse>(new NotImplementedException());
 
     public Task<CreateTerminalResponse> ClientCreateTerminalAsync(CreateTerminalRequest request)
-        => CreateTerminalAsync?.Invoke(this, new ClientEventArgs<CreateTerminalRequest>("CreateTerminal", request)) ?? Task.FromException<CreateTerminalResponse>(new NotImplementedException());
+        => CreateTerminalAsync?.Invoke(request) ?? Task.FromException<CreateTerminalResponse>(new NotImplementedException());
 
     public Task<KillTerminalCommandResponse> ClientKillTerminalCommandAsync(KillTerminalCommandRequest request)
-        => KillTerminalCommandAsync?.Invoke(this, new ClientEventArgs<KillTerminalCommandRequest>("KillTerminalCommand", request)) ?? Task.FromException<KillTerminalCommandResponse>(new NotImplementedException());
+        => KillTerminalCommandAsync?.Invoke(request) ?? Task.FromException<KillTerminalCommandResponse>(new NotImplementedException());
 
     public Task<ReleaseTerminalResponse> ClientReleaseTerminalAsync(ReleaseTerminalRequest request)
-        => ReleaseTerminalAsync?.Invoke(this, new ClientEventArgs<ReleaseTerminalRequest>("ReleaseTerminal", request)) ?? Task.FromException<ReleaseTerminalResponse>(new NotImplementedException());
+        => ReleaseTerminalAsync?.Invoke(request) ?? Task.FromException<ReleaseTerminalResponse>(new NotImplementedException());
 
     public Task<TerminalOutputResponse> ClientTerminalOutputAsync(TerminalOutputRequest request)
-        => TerminalOutputAsync?.Invoke(this, new ClientEventArgs<TerminalOutputRequest>("TerminalOutput", request)) ?? Task.FromException<TerminalOutputResponse>(new NotImplementedException());
+        => TerminalOutputAsync?.Invoke(request) ?? Task.FromException<TerminalOutputResponse>(new NotImplementedException());
 
     public Task<WaitForTerminalExitResponse> ClientWaitForTerminalExitAsync(WaitForTerminalExitRequest request)
-        => WaitForTerminalExitAsync?.Invoke(this, new ClientEventArgs<WaitForTerminalExitRequest>("WaitForTerminalExit", request)) ?? Task.FromException<WaitForTerminalExitResponse>(new NotImplementedException());
+        => WaitForTerminalExitAsync?.Invoke(request) ?? Task.FromException<WaitForTerminalExitResponse>(new NotImplementedException());
 
     public Task<ReadTextFileResponse> ClientReadTextFileAsync(ReadTextFileRequest request)
-        => ReadTextFileAsync?.Invoke(this, new ClientEventArgs<ReadTextFileRequest>("ReadTextFile2", request)) ?? Task.FromException<ReadTextFileResponse>(new NotImplementedException());
+        => ReadTextFileAsync?.Invoke(request) ?? Task.FromException<ReadTextFileResponse>(new NotImplementedException());
 
     public Task<WriteTextFileResponse> ClientWriteTextFileAsync(WriteTextFileRequest request)
-        => WriteTextFileAsync?.Invoke(this, new ClientEventArgs<WriteTextFileRequest>("WriteTextFile", request)) ?? Task.FromException<WriteTextFileResponse>(new NotImplementedException());
+        => WriteTextFileAsync?.Invoke(request) ?? Task.FromException<WriteTextFileResponse>(new NotImplementedException());
 
-    public Task<Dictionary<string, object>> ClientExtMethodAsync(Dictionary<string, object> parameters)
-        => ClientExtMethodAsync?.Invoke(this, new ClientEventArgs<Dictionary<string, object>>("ClientExtMethod", parameters)) ?? Task.FromException<Dictionary<string, object>>(new NotImplementedException());
+    public Task<Dictionary<string, object>> _ClientExtMethodAsync(string method, Dictionary<string, object> parameters)
+        => ClientExtMethodAsync?.Invoke(method, parameters) ?? Task.FromException<Dictionary<string, object>>(new NotImplementedException());
 
-    public Task<Dictionary<string, object>> ClientExtNotificationAsync(Dictionary<string, object> parameters)
-        => ClientExtNotificationAsync?.Invoke(this, new ClientEventArgs<Dictionary<string, object>>("ClientExtNotification", parameters)) ?? Task.FromException<Dictionary<string, object>>(new NotImplementedException());
+    public Task _ClientExtNotificationAsync(string method, Dictionary<string, object> parameters)
+        => ClientExtNotificationAsync?.Invoke(method, parameters) ?? Task.FromException<Dictionary<string, object>>(new NotImplementedException());
 
     #endregion
-
 
     public void Stop()
     {
@@ -175,7 +161,7 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
         }
         catch (Exception ex)
         {
-            Error("Error killing process {0}: {1}.", cmdLine, ex.Message);
+            Error("Error killing agent subprocess {0}: {1}.", cmdLine, ex.Message);
         }
     }   
 
@@ -197,7 +183,19 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
     public readonly StringBuilder? outgoingData;
     #endregion
 
-    
+    #region Events
+    public event ClientEventHandlerAsync<RequestPermissionRequest, RequestPermissionResponse>? RequestPermissionAsync;
+    public event ClientEventHandlerAsync<CreateTerminalRequest, CreateTerminalResponse>? CreateTerminalAsync;
+    public event ClientEventHandlerAsync<KillTerminalCommandRequest, KillTerminalCommandResponse>? KillTerminalCommandAsync;
+    public event ClientEventHandlerAsync<ReleaseTerminalRequest, ReleaseTerminalResponse>? ReleaseTerminalAsync;
+    public event ClientEventHandlerAsync<TerminalOutputRequest, TerminalOutputResponse>? TerminalOutputAsync;
+    public event ClientEventHandlerAsync<WaitForTerminalExitRequest, WaitForTerminalExitResponse>? WaitForTerminalExitAsync;
+    public event ClientEventHandlerAsync<ReadTextFileRequest, ReadTextFileResponse>? ReadTextFileAsync;
+    public event ClientEventHandlerAsync<WriteTextFileRequest, WriteTextFileResponse>? WriteTextFileAsync;
+    public event ClientEventHandlerAsync2<string, Dictionary<string, object>, Dictionary<string, object>>? ClientExtMethodAsync;
+    public event ClientEventHandlerAsync2<string, Dictionary<string, object>>? ClientExtNotificationAsync;
+    public event ClientEventHandlerAsync<SessionNotification>? SessionUpdateAsync;
+    #endregion
 
 }
 

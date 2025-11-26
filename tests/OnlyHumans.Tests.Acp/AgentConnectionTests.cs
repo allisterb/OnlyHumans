@@ -2,20 +2,10 @@ namespace OnlyHumans.Tests.Acp;
 
 using System.Diagnostics;
 
-using Microsoft.Extensions.Configuration;
-
 using OnlyHumans.Acp;
 
-public class AgentConnectionTests : Runtime
-{
-    static AgentConnectionTests()
-    {
-        config = LoadConfigFile("appsettings.json");
-        agentCmdPath = GetRequiredConfigValue(config, "AgentCmdPath");
-        agentCmdArgs = GetRequiredConfigValue(config, "AgentCmdArgs");
-        agentCmdWd = GetRequiredConfigValue(config, "AgentCmdWd");
-    }
-
+public class AgentConnectionTests : TestsRuntime
+{   
     [Fact]
     public async Task CanInitializeAgent()
     {        
@@ -39,6 +29,5 @@ public class AgentConnectionTests : Runtime
         ac.Dispose();
     }
 
-    internal static IConfigurationRoot config;
-    internal static string agentCmdPath, agentCmdArgs, agentCmdWd;
+    
 }

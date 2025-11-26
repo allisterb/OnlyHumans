@@ -23,8 +23,8 @@ public class Agent : Runtime, IDisposable
         await connection.InitializeAsync(new InitializeRequest { ClientCapabilities = clientCapabilities, ClientInfo = clientInfo, ProtocolVersion = 1 }, cancellationToken)
         .Map(Initialize);
 
-    public async Task<Result<Session>> NewSessionAsync(string cwd) => 
-        await connection.NewSessionAsync(new NewSessionRequest() { Cwd = cwd })
+    public async Task<Result<Session>> NewSessionAsync(string cwd, CancellationToken cancellationToken = default) => 
+        await connection.NewSessionAsync(new NewSessionRequest() { Cwd = cwd }, cancellationToken)
         .Map(NewSession);
 
     public void Dispose()
@@ -32,21 +32,18 @@ public class Agent : Runtime, IDisposable
         connection.Dispose();
     }
 
+    protected Session NewSession(NewSessionResponse r)
+    {
+        var s = new Session(this, r.SessionId, r);
+        sessions.Add(r.SessionId, s);
+        return s;
+    }
+
     protected InitializeResponse Initialize(InitializeResponse r)
     {
         this.agentInitializeResponse = r;
         return r;
     }
-
-   
-    protected Session NewSession(NewSessionResponse r)
-    {
-        var s = new Session(this, r.SessionId, r);   
-        sessions.Add(r.SessionId, s);
-        return s;
-    }
-
-
     #endregion
 
     #region Properties
@@ -68,7 +65,5 @@ public class Agent : Runtime, IDisposable
     public readonly Dictionary<string, Session> sessions = new Dictionary<string, Session>();
     protected ulong sessionCounter = 0;
     protected ulong terminalCounter = 0;
-    #endregion
-
-   
+    #endregion   
 }

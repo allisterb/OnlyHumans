@@ -173,6 +173,15 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
     }
     #endregion
 
+    #region Properties
+    public SourceLevels TraceLevel
+    {
+        get => jsonrpc.TraceSource.Switch.Level;
+        set => jsonrpc.TraceSource.Switch.Level = value;
+    }
+
+    public TraceListenerCollection TraceListeners => jsonrpc.TraceSource.Listeners;
+    #endregion
     #region Fields
     protected readonly ProcessStartInfo psi;
     protected readonly Process process;

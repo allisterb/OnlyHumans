@@ -53,4 +53,7 @@ public partial record ClientCapabilities
     };
 }
 
-
+public class AgentNotInitializedException : InvalidOperationException
+{
+    public AgentNotInitializedException() : base("Agent not initialized. Call InitializeAsync first.") { }
+}

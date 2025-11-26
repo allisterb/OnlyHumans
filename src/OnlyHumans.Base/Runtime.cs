@@ -7,7 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading;
-
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -500,6 +500,22 @@ public abstract class Runtime
         }
 
         return builder.ToString();
+    }
+
+    public static IConfigurationRoot LoadConfigFile(string configFilePath, bool required = true) =>    
+        new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile(configFilePath, optional: !required, reloadOnChange: true)
+                .Build();
+    
+    public static string GetRequiredConfigValue(IConfigurationRoot configuration, string key)
+    {
+        var value = configuration[key];
+        if (string.IsNullOrEmpty(value))
+        {
+            throw new ArgumentException($"Configuration value {key} is required but not found or empty.");
+        }
+        else return value;
     }
     #endregion
 

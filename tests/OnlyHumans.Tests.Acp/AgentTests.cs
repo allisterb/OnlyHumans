@@ -9,9 +9,8 @@ public class AgentTests : TestsRuntime
     [Fact]
     public async Task CanCreateAgent()
     {
-        using var agent = new Agent(agentCmdPath, agentCmdArgs, agentCmdWd, "TestClient");
-        agent.connection.TraceLevel = SourceLevels.Verbose;
-        agent.connection.TraceListeners.Add(new ConsoleTraceListener());
+        using var agent = new Agent(agentCmdPath, agentCmdArgs, agentCmdWd, "TestClient")
+            .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());
         var r = await agent.InitializeAsync();
         Assert.True(r.IsSuccess);
         Assert.True(agent.IsInitialized);
@@ -20,9 +19,8 @@ public class AgentTests : TestsRuntime
     [Fact]
     public async Task CanCreateSession()
     {
-        using var agent = new Agent(agentCmdPath, agentCmdArgs, agentCmdWd, "TestClient");
-        agent.connection.TraceLevel = SourceLevels.Verbose;
-        agent.connection.TraceListeners.Add(new ConsoleTraceListener());
+        using var agent = new Agent(agentCmdPath, agentCmdArgs, agentCmdWd, "TestClient")
+            .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());
         var s = await agent.NewSessionAsync("C:\\DevTools\\kimi");
         Assert.True(s.IsSuccess);
     }

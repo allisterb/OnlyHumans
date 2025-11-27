@@ -8,10 +8,9 @@ public class AgentConnectionTests : TestsRuntime
 {   
     [Fact]
     public async Task CanInitializeAgent()
-    {        
-        using var ac = new AgentConnection(agentCmdPath, agentCmdArgs, agentCmdWd);
-        ac.TraceLevel = SourceLevels.Verbose;
-        ac.TraceListeners.Add(new ConsoleTraceListener());   
+    {
+        using var ac = new AgentConnection(agentCmdPath, agentCmdArgs, agentCmdWd, SourceLevels.Verbose, new ConsoleTraceListener());
+
         CancellationTokenSource cts = new CancellationTokenSource(50000);    
         CancellationToken token = cts.Token;    
         var r = await ac.InitializeAsync(new InitializeRequest

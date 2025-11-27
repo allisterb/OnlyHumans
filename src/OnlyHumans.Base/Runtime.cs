@@ -508,15 +508,9 @@ public abstract class Runtime
                 .AddJsonFile(configFilePath, optional: !required, reloadOnChange: true)
                 .Build();
     
-    public static string GetRequiredConfigValue(IConfigurationRoot configuration, string key)
-    {
-        var value = configuration[key];
-        if (string.IsNullOrEmpty(value))
-        {
-            throw new ArgumentException($"Configuration value {key} is required but not found or empty.");
-        }
-        else return value;
-    }
+    public static string GetRequiredConfigValue(IConfigurationRoot configuration, string key) 
+        => configuration[key] ?? throw new ArgumentException($"Configuration value {key} is required but not found.");
+    
     #endregion
 
     #region Fields

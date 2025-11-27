@@ -98,7 +98,7 @@
           "type": "object"
         },
         {
-          "oneOf": [
+          "anyOf": [
             {
               "properties": {
                 "result": {
@@ -495,7 +495,7 @@
           "type": "object"
         },
         {
-          "oneOf": [
+          "anyOf": [
             {
               "properties": {
                 "result": {
@@ -662,7 +662,7 @@
       "discriminator": {
         "propertyName": "type"
       },
-      "oneOf": [
+      "anyOf": [
         {
           "description": "Text content. May be plain text or formatted with Markdown.\n\nAll agents MUST support text content blocks in prompts.\nClients SHOULD render this text as Markdown.",
           "properties": {
@@ -1009,14 +1009,7 @@
           "description": "Capabilities supported by the client."
         },
         "clientInfo": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Implementation"
-            },
-            {
-              "type": "null"
-            }
-          ],
+          "$ref": "#/definitions/Implementation",
           "description": "Information about the Client name and version sent to the Agent.\n\nNote: in future versions of the protocol, this will be required."
         },
         "protocolVersion": {
@@ -1395,7 +1388,7 @@
     },
     "PermissionOptionKind": {
       "description": "The type of permission option being presented to the user.\n\nHelps clients choose appropriate icons and UI treatment.",
-      "oneOf": [
+      "anyOf": [
         {
           "const": "allow_once",
           "description": "Allow this operation only this time.",
@@ -1442,7 +1435,7 @@
     },
     "PlanEntryPriority": {
       "description": "Priority levels for plan entries.\n\nUsed to indicate the relative importance or urgency of different\ntasks in the execution plan.\nSee protocol docs: [Plan Entries](https://agentclientprotocol.com/protocol/agent-plan#plan-entries)",
-      "oneOf": [
+      "anyOf": [
         {
           "const": "high",
           "description": "High priority task - critical to the overall goal.",
@@ -1462,7 +1455,7 @@
     },
     "PlanEntryStatus": {
       "description": "Status of a plan entry in the execution flow.\n\nTracks the lifecycle of each task from planning through completion.\nSee protocol docs: [Plan Entries](https://agentclientprotocol.com/protocol/agent-plan#plan-entries)",
-      "oneOf": [
+      "anyOf": [
         {
           "const": "pending",
           "description": "The task has not started yet.",
@@ -1633,7 +1626,7 @@
       "discriminator": {
         "propertyName": "outcome"
       },
-      "oneOf": [
+      "anyOf": [
         {
           "description": "The prompt turn was cancelled before the user responded.\n\nWhen a client sends a `session/cancel` notification to cancel an ongoing\nprompt turn, it MUST respond to all pending `session/request_permission`\nrequests with this `Cancelled` outcome.\n\nSee protocol docs: [Cancellation](https://agentclientprotocol.com/protocol/prompt-turn#cancellation)",
           "properties": {
@@ -1860,7 +1853,7 @@
       "discriminator": {
         "propertyName": "sessionUpdate"
       },
-      "oneOf": [
+      "anyOf": [
         {
           "description": "A chunk of the user's message being streamed.",
           "properties": {
@@ -2153,7 +2146,7 @@
     },
     "StopReason": {
       "description": "Reasons why an agent stops processing a prompt turn.\n\nSee protocol docs: [Stop Reasons](https://agentclientprotocol.com/protocol/prompt-turn#stop-reasons)",
-      "oneOf": [
+      "anyOf": [
         {
           "const": "end_turn",
           "description": "The turn ended successfully.",
@@ -2275,7 +2268,7 @@
       "discriminator": {
         "propertyName": "type"
       },
-      "oneOf": [
+      "anyOf": [
         {
           "description": "Standard content block (text, images, resources).",
           "properties": {
@@ -2359,7 +2352,7 @@
     },
     "ToolCallStatus": {
       "description": "Execution status of a tool call.\n\nTool calls progress through different statuses during their lifecycle.\n\nSee protocol docs: [Status](https://agentclientprotocol.com/protocol/tool-calls#status)",
-      "oneOf": [
+      "anyOf": [
         {
           "const": "pending",
           "description": "The tool call hasn't started running yet because the input is either\nstreaming or we're awaiting approval.",
@@ -2384,7 +2377,7 @@
     },
     "ToolKind": {
       "description": "Categories of tools that can be invoked.\n\nTool kinds help clients choose appropriate icons and optimize how they\ndisplay tool execution progress.\n\nSee protocol docs: [Creating](https://agentclientprotocol.com/protocol/tool-calls#creating)",
-      "oneOf": [
+      "anyOf": [
         {
           "const": "read",
           "description": "Reading files or data.",

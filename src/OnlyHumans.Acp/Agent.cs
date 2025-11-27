@@ -1,21 +1,23 @@
-﻿namespace OnlyHumans.Acp;
+﻿using System.Diagnostics;
+
+namespace OnlyHumans.Acp;
 
 public class Agent : Runtime, IDisposable
 {
     #region Constructors
-    public Agent(AgentConnection agentConnection, Implementation clientInfo, ClientCapabilities clientCapabilities)
+    public Agent(AgentConnection agentConnection, Implementation clientInfo, ClientCapabilities clientCapabilities, string? name = null)
     {
         this.connection = agentConnection;
         this.clientInfo = clientInfo;
         this.clientCapabilities = clientCapabilities;
+        this.Name = name;
     }
     
-    public Agent(AgentConnection agentConnection, string clientName, string clientVersion = "1.0", string? clientTitle=null)
-        : this(agentConnection, new Implementation() { Name = clientName, Version = clientVersion, Title = clientTitle}, 
-        ClientCapabilities.Default) { }
+    public Agent(AgentConnection agentConnection, string clientName, string clientVersion = "1.0", string? clientTitle=null, string? name=null)
+        : this(agentConnection, new Implementation() { Name = clientName, Version = clientVersion, Title = clientTitle}, ClientCapabilities.Default, name) { }
 
-    public Agent(string cmd, string arguments, string workingDirectory, string clientName, string clientVersion = "1.0", string? clientTitle = null) :
-        this(new AgentConnection(cmd, arguments, workingDirectory), clientName, clientVersion, clientTitle) { }    
+    public Agent(string cmd, string arguments, string workingDirectory, string clientName = "", string clientVersion = "1.0", string? clientTitle = null, string? name = null) :
+        this(new AgentConnection(cmd, arguments, workingDirectory), clientName, clientVersion, clientTitle, name) { }    
     #endregion
 
     #region Methods
@@ -26,6 +28,28 @@ public class Agent : Runtime, IDisposable
     public async Task<Result<Session>> NewSessionAsync(string cwd, CancellationToken cancellationToken = default) => 
         await connection.NewSessionAsync(new NewSessionRequest() { Cwd = cwd }, cancellationToken)
         .Map(NewSession);
+
+    public async Task<Result<PromptResponse>> PromptAsync(string sessionid, string prompt, CancellationToken cancellationToken = default) =>
+        await connection.PromptAsync(new PromptRequest() { SessionId = sessionid, Prompt = { new ContentBlock() } }, cancellationToken);
+
+    public Agent WithName(string name)
+    {
+        this.Name = name;
+        return this;
+    }
+
+    public Agent WithConnectionTracing(SourceLevels sourceLevel, params TraceListener[] listeners)
+    {
+        this.connection.TraceLevel = sourceLevel;
+        if (listeners != null)
+        {
+            foreach (var l in listeners)
+            {
+                this.connection.TraceListeners.Add(l);
+            }
+        }
+        return this;
+    }
 
     public void Dispose()
     {
@@ -47,6 +71,8 @@ public class Agent : Runtime, IDisposable
     #endregion
 
     #region Properties
+    public string? Name { get; private set; }
+
     public bool IsInitialized => agentInitializeResponse != null && agentInitializeResponse.ProtocolVersion  == 1;
 
     public AgentCapabilities AgentCapabilities => agentInitializeResponse?.AgentCapabilities ?? throw new AgentNotInitializedException();

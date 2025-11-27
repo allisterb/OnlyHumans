@@ -569,6 +569,7 @@ namespace OnlyHumans.Acp
     /// <br/>
     /// <br/>See protocol docs: [Content](https://agentclientprotocol.com/protocol/content)
     /// </summary>
+    [Newtonsoft.Json.JsonConverter(typeof(JsonInheritanceConverter), "type")]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial record ContentBlock
     {
@@ -935,7 +936,7 @@ namespace OnlyHumans.Acp
         /// <br/>Note: in future versions of the protocol, this will be required.
         /// </summary>
         [Newtonsoft.Json.JsonProperty("clientInfo", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Implementation? ClientInfo { get; set; }
+        public Implementation ClientInfo { get; set; }
 
         /// <summary>
         /// The latest protocol version supported by the client.
@@ -1384,8 +1385,7 @@ namespace OnlyHumans.Acp
         /// Hint about the nature of this permission option.
         /// </summary>
         [Newtonsoft.Json.JsonProperty("kind", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string Kind { get; set; }
+        public PermissionOptionKind Kind { get; set; }
 
         /// <summary>
         /// Human-readable label to display to the user.
@@ -1413,7 +1413,9 @@ namespace OnlyHumans.Acp
     }
 
     /// <summary>
-    /// Allow this operation only this time.
+    /// The type of permission option being presented to the user.
+    /// <br/>
+    /// <br/>Helps clients choose appropriate icons and UI treatment.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial record PermissionOptionKind
@@ -1459,15 +1461,13 @@ namespace OnlyHumans.Acp
         /// <br/>Used to indicate which tasks are most critical to the overall goal.
         /// </summary>
         [Newtonsoft.Json.JsonProperty("priority", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string Priority { get; set; }
+        public PlanEntryPriority Priority { get; set; }
 
         /// <summary>
         /// Current execution status of this task.
         /// </summary>
         [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string Status { get; set; }
+        public PlanEntryStatus Status { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
@@ -1481,7 +1481,11 @@ namespace OnlyHumans.Acp
     }
 
     /// <summary>
-    /// High priority task - critical to the overall goal.
+    /// Priority levels for plan entries.
+    /// <br/>
+    /// <br/>Used to indicate the relative importance or urgency of different
+    /// <br/>tasks in the execution plan.
+    /// <br/>See protocol docs: [Plan Entries](https://agentclientprotocol.com/protocol/agent-plan#plan-entries)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial record PlanEntryPriority
@@ -1499,7 +1503,10 @@ namespace OnlyHumans.Acp
     }
 
     /// <summary>
-    /// The task has not started yet.
+    /// Status of a plan entry in the execution flow.
+    /// <br/>
+    /// <br/>Tracks the lifecycle of each task from planning through completion.
+    /// <br/>See protocol docs: [Plan Entries](https://agentclientprotocol.com/protocol/agent-plan#plan-entries)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial record PlanEntryStatus
@@ -1645,8 +1652,7 @@ namespace OnlyHumans.Acp
         /// Indicates why the agent stopped processing the turn.
         /// </summary>
         [Newtonsoft.Json.JsonProperty("stopReason", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string StopReason { get; set; }
+        public StopReason StopReason { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
@@ -1806,6 +1812,7 @@ namespace OnlyHumans.Acp
     /// <summary>
     /// The outcome of a permission request.
     /// </summary>
+    [Newtonsoft.Json.JsonConverter(typeof(JsonInheritanceConverter), "outcome")]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial record RequestPermissionOutcome
     {
@@ -1887,7 +1894,6 @@ namespace OnlyHumans.Acp
         /// The user's decision on the permission request.
         /// </summary>
         [Newtonsoft.Json.JsonProperty("outcome", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
         public RequestPermissionOutcome Outcome { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2063,7 +2069,6 @@ namespace OnlyHumans.Acp
         /// The actual update content.
         /// </summary>
         [Newtonsoft.Json.JsonProperty("update", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
         public SessionUpdate Update { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2084,6 +2089,7 @@ namespace OnlyHumans.Acp
     /// <br/>
     /// <br/>See protocol docs: [Agent Reports Output](https://agentclientprotocol.com/protocol/prompt-turn#3-agent-reports-output)
     /// </summary>
+    [Newtonsoft.Json.JsonConverter(typeof(JsonInheritanceConverter), "sessionUpdate")]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial record SessionUpdate
     {
@@ -2229,7 +2235,9 @@ namespace OnlyHumans.Acp
     }
 
     /// <summary>
-    /// The turn ended successfully.
+    /// Reasons why an agent stops processing a prompt turn.
+    /// <br/>
+    /// <br/>See protocol docs: [Stop Reasons](https://agentclientprotocol.com/protocol/prompt-turn#stop-reasons)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial record StopReason
@@ -2407,6 +2415,7 @@ namespace OnlyHumans.Acp
     /// <br/>
     /// <br/>See protocol docs: [Content](https://agentclientprotocol.com/protocol/tool-calls#content)
     /// </summary>
+    [Newtonsoft.Json.JsonConverter(typeof(JsonInheritanceConverter), "type")]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial record ToolCallContent
     {
@@ -2466,8 +2475,11 @@ namespace OnlyHumans.Acp
     }
 
     /// <summary>
-    /// The tool call hasn't started running yet because the input is either
-    /// <br/>streaming or we're awaiting approval.
+    /// Execution status of a tool call.
+    /// <br/>
+    /// <br/>Tool calls progress through different statuses during their lifecycle.
+    /// <br/>
+    /// <br/>See protocol docs: [Status](https://agentclientprotocol.com/protocol/tool-calls#status)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial record ToolCallStatus
@@ -2485,7 +2497,12 @@ namespace OnlyHumans.Acp
     }
 
     /// <summary>
-    /// Reading files or data.
+    /// Categories of tools that can be invoked.
+    /// <br/>
+    /// <br/>Tool kinds help clients choose appropriate icons and optimize how they
+    /// <br/>display tool execution progress.
+    /// <br/>
+    /// <br/>See protocol docs: [Creating](https://agentclientprotocol.com/protocol/tool-calls#creating)
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial record ToolKind
@@ -2649,7 +2666,7 @@ namespace OnlyHumans.Acp
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial record Ll
+    public partial record Schema
     {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -2695,36 +2712,6 @@ namespace OnlyHumans.Acp
         [System.Runtime.Serialization.EnumMember(Value = @"2.0")]
         _2_0 = 0,
 
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial record Annotations2
-    {
-
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
-
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial record ClientInfo
-    {
-
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
-
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
 
     }
 

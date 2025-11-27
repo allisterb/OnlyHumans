@@ -23,5 +23,8 @@ public class AgentTests : TestsRuntime
             .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());
         var s = await agent.NewSessionAsync("C:\\DevTools\\kimi");
         Assert.True(s.IsSuccess);
+        Assert.NotNull(s.Value.sessionId);
+        var pr = await agent.PromptAsync(s.Value.sessionId, "Hello, Agent!");
+        Assert.True(pr.IsSuccess);
     }
 }

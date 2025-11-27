@@ -30,7 +30,7 @@ public class Agent : Runtime, IDisposable
         .Map(NewSession);
 
     public async Task<Result<PromptResponse>> PromptAsync(string sessionid, string prompt, CancellationToken cancellationToken = default) =>
-        await connection.PromptAsync(new PromptRequest() { SessionId = sessionid, Prompt = { new ContentBlock() } }, cancellationToken);
+        await connection.PromptAsync(new PromptRequest() { SessionId = sessionid, Prompt = { new ContentBlockText() {Text = prompt }  } }, cancellationToken);
 
     public Agent WithName(string name)
     {

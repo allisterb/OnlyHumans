@@ -507,10 +507,7 @@ public abstract class Runtime
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(configFilePath, optional: !required, reloadOnChange: true)
                 .Build();
-    
-    public static string GetRequiredConfigValue(IConfigurationRoot configuration, string key) 
-        => configuration[key] ?? throw new ArgumentException($"Configuration value {key} is required but not found.");
-    
+     
     #endregion
 
     #region Fields

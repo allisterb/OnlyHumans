@@ -1,15 +1,13 @@
-namespace OnlyHumans.Tests.Acp;
+namespace OnlyHumans.Acp.Tests;
 
 using System.Diagnostics;
-
-using OnlyHumans.Acp;
 
 public class AgentConnectionTests : TestsRuntime
 {   
     [Fact]
     public async Task CanInitializeAgent()
     {
-        using var ac = new AgentConnection(agentCmdPath, agentCmdArgs, agentCmdWd, SourceLevels.Verbose, new ConsoleTraceListener());
+        using var ac = new AgentConnection(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, SourceLevels.Verbose, new ConsoleTraceListener());
 
         CancellationTokenSource cts = new CancellationTokenSource(50000);    
         CancellationToken token = cts.Token;    

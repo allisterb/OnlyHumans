@@ -14,10 +14,12 @@ public class Session : Runtime
         this.agentResponse = agentResponse;
     }
 
+    public async Task<Result<SetSessionModelResponse>> SetSessionModel(SetSessionModelRequest request) => await this.agent.SetSessionModelAsync(request);
     #region Fields
     public readonly Agent agent;
     public readonly string sessionId;
     public readonly object agentResponse;
+    public string? model;
     #endregion
 }
 

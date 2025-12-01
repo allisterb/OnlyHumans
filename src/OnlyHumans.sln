@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlyHumans.Base", "OnlyHuma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlyHumans.Acp", "OnlyHumans.Acp\OnlyHumans.Acp.csproj", "{FAE1108F-8AF0-458E-9ED8-2A64A9C959ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlyHumans.Tests.Acp", "..\tests\OnlyHumans.Tests.Acp\OnlyHumans.Tests.Acp.csproj", "{032FE94F-4E7A-4885-A9CD-466057C67CB8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlyHumans.Acp.Tests", "..\tests\OnlyHumans.Acp.Tests\OnlyHumans.Acp.Tests.csproj", "{032FE94F-4E7A-4885-A9CD-466057C67CB8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject

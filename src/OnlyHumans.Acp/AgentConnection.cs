@@ -5,15 +5,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
-using static Result;
 
 using Nerdbank.Streams;
 using StreamJsonRpc;
 
+using static Result;
+
 public class AgentConnection : Runtime, IDisposable, IAgentConnection
 {
     #region Constructors
-    public AgentConnection(string cmd, string? arguments = null, string? workingDirectory = null, SourceLevels traceLevel = SourceLevels.Information, TraceListener? traceListener = null, bool monitorIO = false)
+    public AgentConnection(string cmd, string? arguments = null, string? workingDirectory = null, IDictionary<string, string?>? environmentVariables = null, SourceLevels traceLevel = SourceLevels.Information, TraceListener? traceListener = null, bool monitorIO = false)
     {                
         this.cmdLine = cmd + " " + arguments;
         psi = new ProcessStartInfo()
@@ -28,6 +29,13 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
             UseShellExecute = false,
             CreateNoWindow = true,
         };
+        if (environmentVariables is not null)
+        {
+            foreach (var kv in environmentVariables)
+            {                
+                psi.EnvironmentVariables[kv.Key] = kv.Value;                
+            }
+        }
         process = new Process()
         {
             StartInfo = psi,
@@ -114,40 +122,38 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
     #endregion
 
     #region Client Methods
-
     public Task ClientSessionUpdateAsync(SessionNotification request)
-        => SessionUpdateAsync?.Invoke(request) ?? Task.FromException<RequestPermissionResponse>(new NotImplementedException());
+        => SessionUpdateAsync?.Invoke(request) ?? NotImplementedAsync();
 
     public Task<RequestPermissionResponse> ClientRequestPermissionAsync(RequestPermissionRequest request)
-        => RequestPermissionAsync?.Invoke(request) ?? Task.FromException<RequestPermissionResponse>(new NotImplementedException());
+        => RequestPermissionAsync?.Invoke(request) ?? NotImplementedAsync<RequestPermissionResponse>();
 
     public Task<CreateTerminalResponse> ClientCreateTerminalAsync(CreateTerminalRequest request)
-        => CreateTerminalAsync?.Invoke(request) ?? Task.FromException<CreateTerminalResponse>(new NotImplementedException());
+        => CreateTerminalAsync?.Invoke(request) ?? NotImplementedAsync<CreateTerminalResponse>();
 
     public Task<KillTerminalCommandResponse> ClientKillTerminalCommandAsync(KillTerminalCommandRequest request)
-        => KillTerminalCommandAsync?.Invoke(request) ?? Task.FromException<KillTerminalCommandResponse>(new NotImplementedException());
+        => KillTerminalCommandAsync?.Invoke(request) ?? NotImplementedAsync<KillTerminalCommandResponse>();
 
     public Task<ReleaseTerminalResponse> ClientReleaseTerminalAsync(ReleaseTerminalRequest request)
-        => ReleaseTerminalAsync?.Invoke(request) ?? Task.FromException<ReleaseTerminalResponse>(new NotImplementedException());
+        => ReleaseTerminalAsync?.Invoke(request) ?? NotImplementedAsync<ReleaseTerminalResponse>();
 
     public Task<TerminalOutputResponse> ClientTerminalOutputAsync(TerminalOutputRequest request)
-        => TerminalOutputAsync?.Invoke(request) ?? Task.FromException<TerminalOutputResponse>(new NotImplementedException());
+        => TerminalOutputAsync?.Invoke(request) ?? NotImplementedAsync<TerminalOutputResponse>();
 
     public Task<WaitForTerminalExitResponse> ClientWaitForTerminalExitAsync(WaitForTerminalExitRequest request)
-        => WaitForTerminalExitAsync?.Invoke(request) ?? Task.FromException<WaitForTerminalExitResponse>(new NotImplementedException());
+        => WaitForTerminalExitAsync?.Invoke(request) ?? NotImplementedAsync<WaitForTerminalExitResponse>();
 
     public Task<ReadTextFileResponse> ClientReadTextFileAsync(ReadTextFileRequest request)
-        => ReadTextFileAsync?.Invoke(request) ?? Task.FromException<ReadTextFileResponse>(new NotImplementedException());
+        => ReadTextFileAsync?.Invoke(request) ?? NotImplementedAsync<ReadTextFileResponse>( );
 
     public Task<WriteTextFileResponse> ClientWriteTextFileAsync(WriteTextFileRequest request)
-        => WriteTextFileAsync?.Invoke(request) ?? Task.FromException<WriteTextFileResponse>(new NotImplementedException());
+        => WriteTextFileAsync?.Invoke(request) ?? NotImplementedAsync<WriteTextFileResponse>();
 
     public Task<Dictionary<string, object>> _ClientExtMethodAsync(string method, Dictionary<string, object> parameters)
-        => ClientExtMethodAsync?.Invoke(method, parameters) ?? Task.FromException<Dictionary<string, object>>(new NotImplementedException());
+        => ClientExtMethodAsync?.Invoke(method, parameters) ?? NotImplementedAsync<Dictionary<string, object>>();
 
     public Task _ClientExtNotificationAsync(string method, Dictionary<string, object> parameters)
-        => ClientExtNotificationAsync?.Invoke(method, parameters) ?? Task.FromException<Dictionary<string, object>>(new NotImplementedException());
-
+        => ClientExtNotificationAsync?.Invoke(method, parameters) ?? NotImplementedAsync();
     #endregion
 
     public void Stop()

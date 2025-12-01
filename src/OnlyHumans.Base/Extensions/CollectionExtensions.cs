@@ -13,6 +13,13 @@ namespace OnlyHumans
                 stack.Pop();
             }
         }
+
+        public static V AddReturn<K, V>(this IDictionary<K, V> dictionary, K key, V value)
+        {
+            dictionary.Add(key, value);
+            return value;
+        }
+
     }
 
     public static class CollectionUtils

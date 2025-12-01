@@ -26,7 +26,6 @@ namespace OnlyHumans.Acp
     /// Images for visual context or analysis.
     /// </summary>
     [JsonInheritance("image", typeof(ContentBlockImage))]
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial record ContentBlockImage : ContentBlock
     {
         [JsonProperty("_meta", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]

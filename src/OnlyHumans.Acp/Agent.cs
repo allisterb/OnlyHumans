@@ -16,19 +16,30 @@ public class Agent : Runtime, IDisposable
     public Agent(AgentConnection agentConnection, string clientName, string clientVersion = "1.0", string? clientTitle=null, string? name=null)
         : this(agentConnection, new Implementation() { Name = clientName, Version = clientVersion, Title = clientTitle}, ClientCapabilities.Default, name) { }
 
-    public Agent(string cmd, string arguments, string workingDirectory, string clientName = "", string clientVersion = "1.0", string? clientTitle = null, string? name = null) :
-        this(new AgentConnection(cmd, arguments, workingDirectory), clientName, clientVersion, clientTitle, name) { }    
+    public Agent(string cmd, string arguments, string workingDirectory, IDictionary<string, string?>? environmentVariables = null, string clientName = "", string clientVersion = "1.0", string? clientTitle = null, string? name = null) :
+        this(new AgentConnection(cmd, arguments, workingDirectory, environmentVariables), clientName, clientVersion, clientTitle, name) { }    
     #endregion
 
     #region Methods
     public async Task<Result<InitializeResponse>> InitializeAsync(CancellationToken cancellationToken = default) =>
         await connection.InitializeAsync(new InitializeRequest { ClientCapabilities = clientCapabilities, ClientInfo = clientInfo, ProtocolVersion = 1 }, cancellationToken)
-        .Map(Initialize);
+        .Then(Initialize);
+
+    public async Task<Result<AuthenticateResponse>> AuthenticateAsync(string methodId, Dictionary<string, object> properties) =>
+        await connection.AuthenticateAsync(new AuthenticateRequest() { MethodId = methodId, _meta = properties });
 
     public async Task<Result<Session>> NewSessionAsync(string cwd, CancellationToken cancellationToken = default) => 
         await connection.NewSessionAsync(new NewSessionRequest() { Cwd = cwd }, cancellationToken)
-        .Map(NewSession);
+        .Then(NewSession);
 
+    public async Task<Result<SetSessionModelResponse>> SetSessionModelAsync(SetSessionModelRequest request, CancellationToken cancellationToken = default) =>
+        await connection.SetSessionModelAsync(request, cancellationToken)
+        .Then(SetSessionModel);
+
+    public async Task<bool> SetSessionModelAsync(string sessionid, string modelid, CancellationToken cancellationToken = default) =>
+        await SetSessionModelAsync(new SetSessionModelRequest() { SessionId = sessionid, ModelId = modelid }, cancellationToken)
+        .Succeeded();
+                 
     public async Task<Result<PromptResponse>> PromptAsync(string sessionid, string prompt, CancellationToken cancellationToken = default) =>
         await connection.PromptAsync(new PromptRequest() { SessionId = sessionid, Prompt = { new ContentBlockText() {Text = prompt }  } }, cancellationToken);
 
@@ -40,12 +51,12 @@ public class Agent : Runtime, IDisposable
 
     public Agent WithConnectionTracing(SourceLevels sourceLevel, params TraceListener[] listeners)
     {
-        this.connection.TraceLevel = sourceLevel;
+        connection.TraceLevel = sourceLevel;
         if (listeners != null)
         {
             foreach (var l in listeners)
             {
-                this.connection.TraceListeners.Add(l);
+                connection.TraceListeners.Add(l);
             }
         }
         return this;
@@ -56,18 +67,17 @@ public class Agent : Runtime, IDisposable
         connection.Dispose();
     }
 
-    protected Session NewSession(NewSessionResponse r)
-    {
-        var s = new Session(this, r.SessionId, r);
-        sessions.Add(r.SessionId, s);
-        return s;
-    }
-
     protected InitializeResponse Initialize(InitializeResponse r)
+       => this.agentInitializeResponse = r;
+
+    protected Session NewSession(NewSessionResponse r)
+        => this.sessions.AddReturn(r.SessionId, new Session(this, r.SessionId, r));
+
+    protected SetSessionModelResponse SetSessionModel(SetSessionModelResponse r)
     {
-        this.agentInitializeResponse = r;
         return r;
     }
+
     #endregion
 
     #region Properties

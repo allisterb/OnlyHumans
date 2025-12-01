@@ -53,9 +53,7 @@ public struct Result<T>
             return Failure(errorMessage, ex);
         }
     }
-
-    
-
+   
     public ResultType Type;
     public T? _Value;
     public string? Message;
@@ -157,26 +155,44 @@ public static class Result
         r = result;
         return r.IsSuccess;
     }
+
+    public static Task AsyncException<E>() where E : Exception, new() => Task.FromException(new E());
+
+    public static Task<T> AsyncException<T, E>() where E:Exception, new() => Task.FromException<T>(new E());
+
+    public static Task NotImplementedAsync() => AsyncException<NotImplementedException>();
+
+    public static Task<T> NotImplementedAsync<T>() => AsyncException<T, NotImplementedException>();
 }
 
-public static class  ResultExtensions
+public static class ResultExtensions
 {
-    public static Task<Result<U>> Map<T, U>(this Task<Result<T>> resultTask, Func<T, U> func)
+    public static Task<Result<U>> Then<T, U>(this Task<Result<T>> resultTask, Func<T, U> func)
     {
         return resultTask.ContinueWith(t =>
         {
-            var result = t.Result;
-            if (result.IsSuccess)
+            if (resultTask.IsCompletedSuccessfully)
             {
-                return Result<U>.Success(func(result.Value));
+                if (t.Result.IsSuccess)
+                { 
+                    return Result<U>.Success(func(t.Result.Value));
+                }
+                else
+                {
+                    return Result<U>.Failure(t.Result.Message, t.Result.Exception);
+                }
             }
             else
             {
-                return Result<U>.Failure(result.Message, result.Exception);
+                return Result<U>.Failure(null, t.Exception);
             }
         });
     }
 
+    
+
+    public static Task<bool> Succeeded<T>(this Task<Result<T>> resultTask) => 
+        resultTask.ContinueWith(t => t.IsCompletedSuccessfully && t.Result.IsSuccess);
 }
 public struct None
 {

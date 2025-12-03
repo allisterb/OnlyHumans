@@ -71,7 +71,6 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
         jsonrpc = new JsonRpc(new NewLineDelimitedMessageHandler(ostream, istream, new JsonMessageFormatter()));
         jsonrpc.TraceSource.Switch.Level = traceLevel;    
         if (traceListener != null) jsonrpc.TraceSource.Listeners.Add(traceListener);
-        
         // Register client methods
         jsonrpc.AddLocalRpcMethod("fs/read_text_file", ClientSessionUpdateAsync);        
         jsonrpc.AddLocalRpcMethod("fs/write_text_file", ClientWriteTextFileAsync);

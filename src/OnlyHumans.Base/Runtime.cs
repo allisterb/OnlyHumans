@@ -170,7 +170,7 @@ public abstract class Runtime
     {
         if (checkExists && !(File.Exists(cmdName) || (File.Exists(cmdName + ".exe"))|| (isNETCoreTool && File.Exists(cmdName.Replace(".exe", "")))))
         {
-            return FailureError<string>("The executable {0} does not exist.", cmdName);
+            return FailureWithError<string>("The executable {0} does not exist.", cmdName);
         }
         using (Process p = new Process())
         {
@@ -233,7 +233,7 @@ public abstract class Runtime
             }
             catch (Exception ex)
             {
-                return FailureError<string>("Error executing command {0} {1}", ex, cmdName, arguments);
+                return FailureWithError<string>("Error executing command {0} {1}", ex, cmdName, arguments);
             }
         }
     }
@@ -242,7 +242,7 @@ public abstract class Runtime
     {
         if (checkExists && !(File.Exists(cmdName) || (File.Exists(cmdName + ".exe")) || (File.Exists(cmdName.Replace(".exe", "")))))
         {
-            return FailureError<string>("The executable {0} does not exist.", cmdName);
+            return FailureWithError<string>("The executable {0} does not exist.", cmdName);
         }
         using (Process p = new Process())
         {
@@ -304,7 +304,7 @@ public abstract class Runtime
             }
             catch (Exception ex)
             {
-                return FailureError<string>("Error executing command {0} {1}", ex, cmdName, arguments);
+                return FailureWithError<string>("Error executing command {0} {1}", ex, cmdName, arguments);
             }
         }
     }
@@ -319,7 +319,7 @@ public abstract class Runtime
     {
         if (checkExists && !(File.Exists(cmdName) || File.Exists(cmdName + ".exe") || File.Exists(cmdName.Replace(".exe", ""))))
         {
-            return FailureError<string>("The executable {0} does not exist.", cmdName);
+            return FailureWithError<string>("The executable {0} does not exist.", cmdName);
         }
 
         using (Process p = new Process())
@@ -384,7 +384,7 @@ public abstract class Runtime
             }
             catch (Exception ex)
             {
-                return FailureError<string>("Error executing command {0} {1}", ex, cmdName, arguments);
+                return FailureWithError<string>("Error executing command {0} {1}", ex, cmdName, arguments);
             }
         }
     }

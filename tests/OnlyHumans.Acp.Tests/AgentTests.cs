@@ -39,7 +39,7 @@ public class AgentTests : TestsRuntime
     {
         using var agent = new Agent(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, "TestClient")
             .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());
-        var r = await agent.InitializeAsync();
+        await agent.InitializeAsync();
         var ar = await agent.NewSessionAsync(agentCmdWd);
         Assert.True(ar.IsSuccess);
         var mr = await agent.SetSessionModelAsync(new SetSessionModelRequest() { SessionId = ar.Value.sessionId, ModelId = agentModel });

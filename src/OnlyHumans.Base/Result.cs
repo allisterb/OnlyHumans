@@ -64,7 +64,7 @@ public static class Result
 {
     public static Result<T> Success<T>(T value) => new Result<T>(ResultType.Success, value);
 
-    public static Result<T> SuccessInfo<T>(T value, string message, params object[] args)
+    public static Result<T> SuccessWithInfo<T>(T value, string message, params object[] args)
     {
         Runtime.Info(message, args);
         return Success(value);
@@ -75,7 +75,7 @@ public static class Result
 
     public static Result<T> Failure<T>(string message, Exception exception, params object[] args) => new Result<T>(ResultType.Failure, exception: exception, message: string.Format(message, args));
 
-    public static Result<T> FailureError<T>(string message, Exception? exception = null)
+    public static Result<T> FailureWithError<T>(string message, Exception? exception = null)
     {
         if (exception is not null)
         {
@@ -89,7 +89,7 @@ public static class Result
         }
     }
 
-    public static Result<T> FailureError<T>(string message, params object[] args)
+    public static Result<T> FailureWithError<T>(string message, params object[] args)
     {
 
         Runtime.Error(message, args);
@@ -97,7 +97,7 @@ public static class Result
 
     }
 
-    public static Result<T> FailureError<T>(string message, Exception exception, params object[] args)
+    public static Result<T> FailureWithError<T>(string message, Exception exception, params object[] args)
     {
         Runtime.Error(exception, message, args);
         return Failure<T>(message, exception, args);
@@ -165,35 +165,6 @@ public static class Result
     public static Task<T> NotImplementedAsync<T>() => AsyncException<T, NotImplementedException>();
 }
 
-public static class ResultExtensions
-{
-    public static Task<Result<U>> Then<T, U>(this Task<Result<T>> resultTask, Func<T, U> func)
-    {
-        return resultTask.ContinueWith(t =>
-        {
-            if (resultTask.IsCompletedSuccessfully)
-            {
-                if (t.Result.IsSuccess)
-                { 
-                    return Result<U>.Success(func(t.Result.Value));
-                }
-                else
-                {
-                    return Result<U>.Failure(t.Result.Message, t.Result.Exception);
-                }
-            }
-            else
-            {
-                return Result<U>.Failure(null, t.Exception);
-            }
-        });
-    }
-
-    
-
-    public static Task<bool> Succeeded<T>(this Task<Result<T>> resultTask) => 
-        resultTask.ContinueWith(t => t.IsCompletedSuccessfully && t.Result.IsSuccess);
-}
 public struct None
 {
     public static readonly None Value = new None(); 

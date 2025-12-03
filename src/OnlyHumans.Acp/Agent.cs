@@ -45,7 +45,7 @@ public class Agent : Runtime, IDisposable
 
     public Agent WithName(string name)
     {
-        this.Name = name;
+        Name = name;
         return this;
     }
 

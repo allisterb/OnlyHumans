@@ -49,6 +49,12 @@ public class Agent : Runtime, IDisposable
         return this;
     }
 
+    /// <summary>
+    /// Enable tracing for the JSON-RPC connection.
+    /// </summary>
+    /// <param name="sourceLevel">Trace level</param>
+    /// <param name="listeners">Trace listeners to add</param>
+    /// <returns></returns>
     public Agent WithConnectionTracing(SourceLevels sourceLevel, params TraceListener[] listeners)
     {
         connection.TraceLevel = sourceLevel;

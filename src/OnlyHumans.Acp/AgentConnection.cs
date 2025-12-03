@@ -22,8 +22,8 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
             FileName = cmd,
             Arguments = arguments,
             WorkingDirectory = workingDirectory ?? AssemblyLocation,
-            StandardOutputEncoding = Encoding.UTF8,
-            StandardInputEncoding = Encoding.UTF8,
+            StandardOutputEncoding = new UTF8Encoding(false),
+            StandardInputEncoding = new UTF8Encoding(false),
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
             UseShellExecute = false,
@@ -68,7 +68,9 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
             ostream = omonitoringStream;                        
         }
 
-        jsonrpc = new JsonRpc(new NewLineDelimitedMessageHandler(ostream, istream, new JsonMessageFormatter()));
+        //jsonrpc = new JsonRpc(new JsonRpcMessageHandler(ostream, istream, new JsonMessageFormatter(), JsonRpcMessageHandler.DelimiterType.Header, true) );
+        jsonrpc = new JsonRpc(new NewLineDelimitedMessageHandler(ostream, istream, new JsonMessageFormatter()) { NewLine = NewLineDelimitedMessageHandler.NewLineStyle.Lf});
+
         jsonrpc.TraceSource.Switch.Level = traceLevel;    
         if (traceListener != null) jsonrpc.TraceSource.Listeners.Add(traceListener);
         // Register client methods

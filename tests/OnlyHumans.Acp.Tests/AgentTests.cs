@@ -49,4 +49,16 @@ public class AgentTests : TestsRuntime
         var pr = await agent.PromptAsync(ar.Value.sessionId, "hello kimi");
         Assert.True(pr.IsSuccess);
     }
+
+    [Fact]
+    public async Task CanPrompt()
+    {
+        using var agent = new Agent(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, "TestClient")
+            .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());
+        await agent.InitializeAsync();
+        var ar = await agent.NewSessionAsync(agentCmdWd);
+        Assert.True(ar.IsSuccess);
+        var pr = await agent.PromptAsync(ar.Value.sessionId, "hello");
+        Assert.True(pr.IsSuccess);
+    }
 }

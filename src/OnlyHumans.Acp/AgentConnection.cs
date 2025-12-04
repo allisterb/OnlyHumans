@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -67,24 +68,12 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
             istream = imonitoringStream;
             ostream = omonitoringStream;                        
         }
-
-        //jsonrpc = new JsonRpc(new JsonRpcMessageHandler(ostream, istream, new JsonMessageFormatter(), JsonRpcMessageHandler.DelimiterType.Header, true) );
-        jsonrpc = new JsonRpc(new NewLineDelimitedMessageHandler(ostream, istream, new JsonMessageFormatter()) { NewLine = NewLineDelimitedMessageHandler.NewLineStyle.Lf});
-
+        agentEvents = new AgentConnectionEvents(this);
+        jsonrpc = new JsonRpc(new JsonRpcMessageHandler(ostream, istream, new JsonMessageFormatter(), JsonRpcMessageHandler.DelimiterType.NewLine, false));
         jsonrpc.TraceSource.Switch.Level = traceLevel;    
         if (traceListener != null) jsonrpc.TraceSource.Listeners.Add(traceListener);
-        // Register client methods
-        jsonrpc.AddLocalRpcMethod("fs/read_text_file", ClientSessionUpdateAsync);        
-        jsonrpc.AddLocalRpcMethod("fs/write_text_file", ClientWriteTextFileAsync);
-        jsonrpc.AddLocalRpcMethod("session/request_permission", ClientRequestPermissionAsync);
-        jsonrpc.AddLocalRpcMethod("session/update", ClientSessionUpdateAsync);
-        jsonrpc.AddLocalRpcMethod("terminal/create", ClientCreateTerminalAsync);
-        jsonrpc.AddLocalRpcMethod("terminal/kill", ClientKillTerminalCommandAsync);
-        jsonrpc.AddLocalRpcMethod("terminal/output", ClientTerminalOutputAsync);
-        jsonrpc.AddLocalRpcMethod("terminal/release",ClientReleaseTerminalAsync);
-        jsonrpc.AddLocalRpcMethod("terminal/wait_for_exit", ClientWaitForTerminalExitAsync);    
-        
-        jsonrpc.StartListening();               
+        jsonrpc.AddLocalRpcTarget(agentEvents, new JsonRpcTargetOptions() { UseSingleObjectParameterDeserialization = true });             
+        jsonrpc.StartListening();
     }
     #endregion
  
@@ -120,41 +109,6 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
 
     public async Task<Result<None>> ExtNotificationAsync(string notification, Dictionary<string, object>? parameters = null)
         => await ExecuteAsync(jsonrpc.NotifyAsync(notification, parameters));
-    #endregion
-
-    #region Client Methods
-    public Task ClientSessionUpdateAsync(SessionNotification request)
-        => SessionUpdateAsync?.Invoke(request) ?? NotImplementedAsync();
-
-    public Task<RequestPermissionResponse> ClientRequestPermissionAsync(RequestPermissionRequest request)
-        => RequestPermissionAsync?.Invoke(request) ?? NotImplementedAsync<RequestPermissionResponse>();
-
-    public Task<CreateTerminalResponse> ClientCreateTerminalAsync(CreateTerminalRequest request)
-        => CreateTerminalAsync?.Invoke(request) ?? NotImplementedAsync<CreateTerminalResponse>();
-
-    public Task<KillTerminalCommandResponse> ClientKillTerminalCommandAsync(KillTerminalCommandRequest request)
-        => KillTerminalCommandAsync?.Invoke(request) ?? NotImplementedAsync<KillTerminalCommandResponse>();
-
-    public Task<ReleaseTerminalResponse> ClientReleaseTerminalAsync(ReleaseTerminalRequest request)
-        => ReleaseTerminalAsync?.Invoke(request) ?? NotImplementedAsync<ReleaseTerminalResponse>();
-
-    public Task<TerminalOutputResponse> ClientTerminalOutputAsync(TerminalOutputRequest request)
-        => TerminalOutputAsync?.Invoke(request) ?? NotImplementedAsync<TerminalOutputResponse>();
-
-    public Task<WaitForTerminalExitResponse> ClientWaitForTerminalExitAsync(WaitForTerminalExitRequest request)
-        => WaitForTerminalExitAsync?.Invoke(request) ?? NotImplementedAsync<WaitForTerminalExitResponse>();
-
-    public Task<ReadTextFileResponse> ClientReadTextFileAsync(ReadTextFileRequest request)
-        => ReadTextFileAsync?.Invoke(request) ?? NotImplementedAsync<ReadTextFileResponse>( );
-
-    public Task<WriteTextFileResponse> ClientWriteTextFileAsync(WriteTextFileRequest request)
-        => WriteTextFileAsync?.Invoke(request) ?? NotImplementedAsync<WriteTextFileResponse>();
-
-    public Task<Dictionary<string, object>> _ClientExtMethodAsync(string method, Dictionary<string, object> parameters)
-        => ClientExtMethodAsync?.Invoke(method, parameters) ?? NotImplementedAsync<Dictionary<string, object>>();
-
-    public Task _ClientExtNotificationAsync(string method, Dictionary<string, object> parameters)
-        => ClientExtNotificationAsync?.Invoke(method, parameters) ?? NotImplementedAsync();
     #endregion
 
     public void Stop()
@@ -194,6 +148,7 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
     protected readonly ProcessStartInfo psi;
     protected readonly Process process;
     protected readonly JsonRpc jsonrpc;
+    protected readonly AgentConnectionEvents agentEvents;
    
     public readonly string cmdLine;
     public readonly StringBuilder? incomingData;
@@ -212,6 +167,56 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
     public event ClientEventHandlerAsync2<string, Dictionary<string, object>, Dictionary<string, object>>? ClientExtMethodAsync;
     public event ClientEventHandlerAsync2<string, Dictionary<string, object>>? ClientExtNotificationAsync;
     public event ClientEventHandlerAsync<SessionNotification>? SessionUpdateAsync;
+    #endregion
+
+    #region Types
+    public class AgentConnectionEvents
+    {
+        public AgentConnectionEvents(AgentConnection conn)
+        {
+            this.conn = conn;
+        }
+
+        #region RPC methods
+        [JsonRpcMethod("session/update", UseSingleObjectParameterDeserialization = true)]
+        public Task ClientSessionUpdateAsync(SessionNotification request) => conn.SessionUpdateAsync?.Invoke(request) ?? NotImplementedAsync();
+
+        [JsonRpcMethod("session/request_permission", UseSingleObjectParameterDeserialization = true)]
+        public Task<RequestPermissionResponse> ClientRequestPermissionAsync(RequestPermissionRequest request)
+            => conn.RequestPermissionAsync?.Invoke(request) ?? NotImplementedAsync<RequestPermissionResponse>();
+
+        [JsonRpcMethod("terminal/create", UseSingleObjectParameterDeserialization = true)]
+        public Task<CreateTerminalResponse> ClientCreateTerminalAsync(CreateTerminalRequest request)
+            => conn.CreateTerminalAsync?.Invoke(request) ?? NotImplementedAsync<CreateTerminalResponse>();
+
+        [JsonRpcMethod("terminal/kill", UseSingleObjectParameterDeserialization = true)]
+        public Task<KillTerminalCommandResponse> ClientKillTerminalCommandAsync(KillTerminalCommandRequest request)
+            => conn.KillTerminalCommandAsync?.Invoke(request) ?? NotImplementedAsync<KillTerminalCommandResponse>();
+
+        [JsonRpcMethod("terminal/release", UseSingleObjectParameterDeserialization = true)]
+        public Task<ReleaseTerminalResponse> ClientReleaseTerminalAsync(ReleaseTerminalRequest request)
+            => conn.ReleaseTerminalAsync?.Invoke(request) ?? NotImplementedAsync<ReleaseTerminalResponse>();
+
+        [JsonRpcMethod("terminal/output", UseSingleObjectParameterDeserialization = true)]
+        public Task<TerminalOutputResponse> ClientTerminalOutputAsync(TerminalOutputRequest request)
+            => conn.TerminalOutputAsync?.Invoke(request) ?? NotImplementedAsync<TerminalOutputResponse>();
+
+        [JsonRpcMethod("terminal/wait_for_exit", UseSingleObjectParameterDeserialization = true)]
+        public Task<WaitForTerminalExitResponse> ClientWaitForTerminalExitAsync(WaitForTerminalExitRequest request)
+            => conn.WaitForTerminalExitAsync?.Invoke(request) ?? NotImplementedAsync<WaitForTerminalExitResponse>();
+
+        [JsonRpcMethod("fs/read_text_file", UseSingleObjectParameterDeserialization = true)]
+        public Task<ReadTextFileResponse> ClientReadTextFileAsync(ReadTextFileRequest request)
+            => conn.ReadTextFileAsync?.Invoke(request) ?? NotImplementedAsync<ReadTextFileResponse>();
+
+        [JsonRpcMethod("fs/write_text_file", UseSingleObjectParameterDeserialization = true)]
+        public Task<WriteTextFileResponse> ClientWriteTextFileAsync(WriteTextFileRequest request)
+            => conn.WriteTextFileAsync?.Invoke(request) ?? NotImplementedAsync<WriteTextFileResponse>();
+
+        #endregion
+
+        AgentConnection conn;
+    }
     #endregion
 }
 

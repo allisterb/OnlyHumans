@@ -2146,33 +2146,7 @@
     },
     "StopReason": {
       "description": "Reasons why an agent stops processing a prompt turn.\n\nSee protocol docs: [Stop Reasons](https://agentclientprotocol.com/protocol/prompt-turn#stop-reasons)",
-      "anyOf": [
-        {
-          "const": "end_turn",
-          "description": "The turn ended successfully.",
-          "type": "string"
-        },
-        {
-          "const": "max_tokens",
-          "description": "The turn ended because the agent reached the maximum number of tokens.",
-          "type": "string"
-        },
-        {
-          "const": "max_turn_requests",
-          "description": "The turn ended because the agent reached the maximum number of allowed\nagent requests between user turns.",
-          "type": "string"
-        },
-        {
-          "const": "refusal",
-          "description": "The turn ended because the agent refused to continue. The user prompt\nand everything that comes after it won't be included in the next\nprompt, so this should be reflected in the UI.",
-          "type": "string"
-        },
-        {
-          "const": "cancelled",
-          "description": "The turn was cancelled by the client via `session/cancel`.\n\nThis stop reason MUST be returned when the client sends a `session/cancel`\nnotification, even if the cancellation causes exceptions in underlying operations.\nAgents should catch these exceptions and return this semantically meaningful\nresponse to confirm successful cancellation.",
-          "type": "string"
-        }
-      ]
+      "type": "string"
     },
     "TerminalExitStatus": {
       "description": "Exit status of a terminal command.",

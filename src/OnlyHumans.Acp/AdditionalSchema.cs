@@ -118,4 +118,195 @@ namespace OnlyHumans.Acp
         [Required]
         public EmbeddedResourceResource Resource { get; set; } = new EmbeddedResourceResource();
     }
+
+
+
+  
+        /// <summary>
+        /// A chunk of the user's message being streamed.
+        /// </summary>
+        [JsonInheritance("user_message_chunk", typeof(SessionUpdateUserMessageChunk))]
+        public partial record SessionUpdateUserMessageChunk : SessionUpdate
+        {
+            [JsonProperty("_meta", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public object? _meta { get; set; }
+
+            [JsonProperty("content", Required = Required.Always)]
+            [Required]
+            public ContentBlock Content { get; set; } = null!;
+
+            [JsonProperty("sessionUpdate", Required = Required.Always)]
+            [JsonConverter(typeof(StringEnumConverter))]
+            public string SessionUpdateType { get; set; } = "user_message_chunk";
+        }
+
+        /// <summary>
+        /// A chunk of the agent's response being streamed.
+        /// </summary>
+        [JsonInheritance("agent_message_chunk", typeof(SessionUpdateAgentMessageChunk))]
+        public partial record SessionUpdateAgentMessageChunk : SessionUpdate
+        {
+            [JsonProperty("_meta", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public object? _meta { get; set; }
+
+            [JsonProperty("content", Required = Required.Always)]
+            [Required]
+            public ContentBlock Content { get; set; } = null!;
+
+            [JsonProperty("sessionUpdate", Required = Required.Always)]
+            [JsonConverter(typeof(StringEnumConverter))]
+            public string SessionUpdateType { get; set; } = "agent_message_chunk";
+        }
+
+        /// <summary>
+        /// A chunk of the agent's internal reasoning being streamed.
+        /// </summary>
+        [JsonInheritance("agent_thought_chunk", typeof(SessionUpdateAgentThoughtChunk))]
+        public partial record SessionUpdateAgentThoughtChunk : SessionUpdate
+        {
+            [JsonProperty("_meta", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public object? _meta { get; set; }
+
+            [JsonProperty("content", Required = Required.Always)]
+            [Required]
+            public ContentBlock Content { get; set; } = null!;
+
+            [JsonProperty("sessionUpdate", Required = Required.Always)]
+            [JsonConverter(typeof(StringEnumConverter))]
+            public string SessionUpdateType { get; set; } = "agent_thought_chunk";
+        }
+
+        /// <summary>
+        /// Notification that a new tool call has been initiated.
+        /// </summary>
+        [JsonInheritance("tool_call", typeof(SessionUpdateToolCall))]
+        public partial record SessionUpdateToolCall : SessionUpdate
+        {
+            [JsonProperty("_meta", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public object? _meta { get; set; }
+
+            [JsonProperty("content", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public ICollection<ToolCallContent>? Content { get; set; }
+
+            [JsonProperty("kind", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public string? Kind { get; set; }
+
+            [JsonProperty("locations", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public ICollection<ToolCallLocation>? Locations { get; set; }
+
+            [JsonProperty("rawInput", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public object? RawInput { get; set; }
+
+            [JsonProperty("rawOutput", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public object? RawOutput { get; set; }
+
+            [JsonProperty("sessionUpdate", Required = Required.Always)]
+            [JsonConverter(typeof(StringEnumConverter))]
+            public string SessionUpdateType { get; set; } = "tool_call";
+
+            [JsonProperty("status", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public string? Status { get; set; }
+
+            [JsonProperty("title", Required = Required.Always)]
+            [Required(AllowEmptyStrings = true)]
+            public string Title { get; set; } = "";
+
+            [JsonProperty("toolCallId", Required = Required.Always)]
+            [Required(AllowEmptyStrings = true)]
+            public string ToolCallId { get; set; } = "";
+        }
+
+        /// <summary>
+        /// Update on the status or results of a tool call.
+        /// </summary>
+        [JsonInheritance("tool_call_update", typeof(SessionUpdateToolCallUpdate))]
+        public partial record SessionUpdateToolCallUpdate : SessionUpdate
+        {
+            [JsonProperty("_meta", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public object? _meta { get; set; }
+
+            [JsonProperty("content", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public ICollection<ToolCallContent>? Content { get; set; }
+
+            [JsonProperty("kind", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public string? Kind { get; set; }
+
+            [JsonProperty("locations", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public ICollection<ToolCallLocation>? Locations { get; set; }
+
+            [JsonProperty("rawInput", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public object? RawInput { get; set; }
+
+            [JsonProperty("rawOutput", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public object? RawOutput { get; set; }
+
+            [JsonProperty("sessionUpdate", Required = Required.Always)]
+            [JsonConverter(typeof(StringEnumConverter))]
+            public string SessionUpdateType { get; set; } = "tool_call_update";
+
+            [JsonProperty("status", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public string? Status { get; set; }
+
+            [JsonProperty("title", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public string? Title { get; set; }
+
+            [JsonProperty("toolCallId", Required = Required.Always)]
+            [Required(AllowEmptyStrings = true)]
+            public string ToolCallId { get; set; } = "";
+        }
+
+        /// <summary>
+        /// The agent's execution plan for complex tasks.
+        /// </summary>
+        [JsonInheritance("plan", typeof(SessionUpdatePlan))]
+        public partial record SessionUpdatePlan : SessionUpdate
+        {
+            [JsonProperty("_meta", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public object? _meta { get; set; }
+
+            [JsonProperty("entries", Required = Required.Always)]
+            [Required]
+            public ICollection<PlanEntry> Entries { get; set; } = new List<PlanEntry>();
+
+            [JsonProperty("sessionUpdate", Required = Required.Always)]
+            [JsonConverter(typeof(StringEnumConverter))]
+            public string SessionUpdateType { get; set; } = "plan";
+        }
+
+        /// <summary>
+        /// Available commands are ready or have changed.
+        /// </summary>
+        [JsonInheritance("available_commands_update", typeof(SessionUpdateAvailableCommandsUpdate))]
+        public partial record SessionUpdateAvailableCommandsUpdate : SessionUpdate
+        {
+            [JsonProperty("_meta", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public object? _meta { get; set; }
+
+            [JsonProperty("availableCommands", Required = Required.Always)]
+            [Required]
+            public ICollection<AvailableCommand> AvailableCommands { get; set; } = new List<AvailableCommand>();
+
+            [JsonProperty("sessionUpdate", Required = Required.Always)]
+            [JsonConverter(typeof(StringEnumConverter))]
+            public string SessionUpdateType { get; set; } = "available_commands_update";
+        }
+
+        /// <summary>
+        /// The current mode of the session has changed.
+        /// </summary>
+        [JsonInheritance("current_mode_update", typeof(SessionUpdateCurrentModeUpdate))]
+        public partial record SessionUpdateCurrentModeUpdate : SessionUpdate
+        {
+            [JsonProperty("_meta", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+            public object? _meta { get; set; }
+
+            [JsonProperty("currentModeId", Required = Required.Always)]
+            [Required(AllowEmptyStrings = true)]
+            public string CurrentModeId { get; set; } = "";
+
+            [JsonProperty("sessionUpdate", Required = Required.Always)]
+            [JsonConverter(typeof(StringEnumConverter))]
+            public string SessionUpdateType { get; set; } = "current_mode_update";
+        }
+    
 }

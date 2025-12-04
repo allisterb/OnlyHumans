@@ -1652,7 +1652,8 @@ namespace OnlyHumans.Acp
         /// Indicates why the agent stopped processing the turn.
         /// </summary>
         [Newtonsoft.Json.JsonProperty("stopReason", Required = Newtonsoft.Json.Required.Always)]
-        public StopReason StopReason { get; set; }
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string StopReason { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
@@ -2222,26 +2223,6 @@ namespace OnlyHumans.Acp
         /// </summary>
         [Newtonsoft.Json.JsonProperty("_meta", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public object _meta { get; set; }
-
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
-
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-    }
-
-    /// <summary>
-    /// Reasons why an agent stops processing a prompt turn.
-    /// <br/>
-    /// <br/>See protocol docs: [Stop Reasons](https://agentclientprotocol.com/protocol/prompt-turn#stop-reasons)
-    /// </summary>
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.2.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial record StopReason
-    {
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 

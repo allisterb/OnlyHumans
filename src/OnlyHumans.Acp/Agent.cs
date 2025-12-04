@@ -11,6 +11,8 @@ public class Agent : Runtime, IDisposable
         this.clientInfo = clientInfo;
         this.clientCapabilities = clientCapabilities;
         this.Name = name;
+
+        this.connection.SessionUpdateAsync += OnSessionUpdate;
     }
     
     public Agent(AgentConnection agentConnection, string clientName, string clientVersion = "1.0", string? clientTitle=null, string? name=null)
@@ -43,6 +45,10 @@ public class Agent : Runtime, IDisposable
     public async Task<Result<PromptResponse>> PromptAsync(string sessionid, string prompt, CancellationToken cancellationToken = default) =>
         await connection.PromptAsync(new PromptRequest() { SessionId = sessionid, Prompt = { new ContentBlockText() {Text = prompt }  } }, cancellationToken);
 
+    public virtual async Task OnSessionUpdate(SessionNotification request)
+    {
+        var r = request.Update;
+    }
     public Agent WithName(string name)
     {
         Name = name;

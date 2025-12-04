@@ -68,11 +68,11 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
             istream = imonitoringStream;
             ostream = omonitoringStream;                        
         }
-        agentEvents = new AgentConnectionEvents(this);
+        agentRpcEvents = new AgentConnectionRpcEvents(this);
         jsonrpc = new JsonRpc(new JsonRpcMessageHandler(ostream, istream, new JsonMessageFormatter(), JsonRpcMessageHandler.DelimiterType.NewLine, false));
         jsonrpc.TraceSource.Switch.Level = traceLevel;    
         if (traceListener != null) jsonrpc.TraceSource.Listeners.Add(traceListener);
-        jsonrpc.AddLocalRpcTarget(agentEvents, new JsonRpcTargetOptions() { UseSingleObjectParameterDeserialization = true });             
+        jsonrpc.AddLocalRpcTarget(agentRpcEvents, new JsonRpcTargetOptions() { UseSingleObjectParameterDeserialization = true });             
         jsonrpc.StartListening();
     }
     #endregion
@@ -148,7 +148,7 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
     protected readonly ProcessStartInfo psi;
     protected readonly Process process;
     protected readonly JsonRpc jsonrpc;
-    protected readonly AgentConnectionEvents agentEvents;
+    protected readonly AgentConnectionRpcEvents agentRpcEvents;
    
     public readonly string cmdLine;
     public readonly StringBuilder? incomingData;
@@ -170,14 +170,14 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
     #endregion
 
     #region Types
-    public class AgentConnectionEvents
+    public class AgentConnectionRpcEvents
     {
-        public AgentConnectionEvents(AgentConnection conn)
+        public AgentConnectionRpcEvents(AgentConnection conn)
         {
             this.conn = conn;
         }
 
-        #region RPC methods
+        #region RPC events
         [JsonRpcMethod("session/update", UseSingleObjectParameterDeserialization = true)]
         public Task ClientSessionUpdateAsync(SessionNotification request) => conn.SessionUpdateAsync?.Invoke(request) ?? NotImplementedAsync();
 

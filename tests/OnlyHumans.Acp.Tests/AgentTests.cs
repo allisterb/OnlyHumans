@@ -55,6 +55,8 @@ public class AgentTests : TestsRuntime
     {
         using var agent = new Agent(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, "TestClient")
             .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());
+        agent.SessionUpdateAsync += (async s => Assert.NotNull(s.Update));
+
         await agent.InitializeAsync();
         var ar = await agent.NewSessionAsync(agentCmdWd);
         Assert.True(ar.IsSuccess);

@@ -41,6 +41,7 @@ public interface IAgentConnection
     event ClientEventHandlerAsync2<string, Dictionary<string, object>> ClientExtNotificationAsync;
 }
 
+
 public partial record ClientCapabilities
 {
     public static ClientCapabilities Default = new ClientCapabilities()

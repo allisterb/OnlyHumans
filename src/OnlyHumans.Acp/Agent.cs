@@ -2,6 +2,8 @@
 
 namespace OnlyHumans.Acp;
 
+using static Result;
+
 public class Agent : Runtime, IDisposable
 {
     #region Constructors
@@ -12,7 +14,17 @@ public class Agent : Runtime, IDisposable
         this.clientCapabilities = clientCapabilities;
         this.Name = name;
 
-        this.connection.SessionUpdateAsync += OnSessionUpdate;
+        this.connection.SessionUpdateAsync += s => this.SessionUpdateAsync?.Invoke(s) ?? NotImplementedAsync();
+        this.connection.RequestPermissionAsync += (req) => this.RequestPermissionAsync?.Invoke(req) ?? NotImplementedAsync<RequestPermissionResponse>();
+        this.connection.CreateTerminalAsync += (req) => this.CreateTerminalAsync?.Invoke(req) ?? NotImplementedAsync<CreateTerminalResponse>();
+        this.connection.KillTerminalCommandAsync += (req) => this.KillTerminalCommandAsync?.Invoke(req) ?? NotImplementedAsync<KillTerminalCommandResponse>();
+        this.connection.ReleaseTerminalAsync += (req) => this.ReleaseTerminalAsync?.Invoke(req) ?? NotImplementedAsync<ReleaseTerminalResponse>();
+        this.connection.TerminalOutputAsync += (req) => this.TerminalOutputAsync?.Invoke(req) ?? NotImplementedAsync<TerminalOutputResponse>();
+        this.connection.WaitForTerminalExitAsync += (req) => this.WaitForTerminalExitAsync?.Invoke(req) ?? NotImplementedAsync<WaitForTerminalExitResponse>();
+        this.connection.ReadTextFileAsync += (req) => this.ReadTextFileAsync?.Invoke(req) ?? NotImplementedAsync<ReadTextFileResponse>();
+        this.connection.WriteTextFileAsync += (req) => this.WriteTextFileAsync?.Invoke(req) ?? NotImplementedAsync<WriteTextFileResponse>();
+        this.connection.ClientExtMethodAsync += (method, dict) => this.ClientExtMethodAsync?.Invoke(method, dict) ?? NotImplementedAsync<Dictionary<string, object>>();
+        this.connection.ClientExtNotificationAsync += (method, dict) => this.ClientExtNotificationAsync?.Invoke(method, dict) ?? NotImplementedAsync();
     }
     
     public Agent(AgentConnection agentConnection, string clientName, string clientVersion = "1.0", string? clientTitle=null, string? name=null)
@@ -45,10 +57,6 @@ public class Agent : Runtime, IDisposable
     public async Task<Result<PromptResponse>> PromptAsync(string sessionid, string prompt, CancellationToken cancellationToken = default) =>
         await connection.PromptAsync(new PromptRequest() { SessionId = sessionid, Prompt = { new ContentBlockText() {Text = prompt }  } }, cancellationToken);
 
-    public virtual async Task OnSessionUpdate(SessionNotification request)
-    {
-        var r = request.Update;
-    }
     public Agent WithName(string name)
     {
         Name = name;
@@ -105,13 +113,25 @@ public class Agent : Runtime, IDisposable
 
     #endregion
 
+    #region Events
+    public event ClientEventHandlerAsync<RequestPermissionRequest, RequestPermissionResponse>? RequestPermissionAsync;
+    public event ClientEventHandlerAsync<CreateTerminalRequest, CreateTerminalResponse>? CreateTerminalAsync;
+    public event ClientEventHandlerAsync<KillTerminalCommandRequest, KillTerminalCommandResponse>? KillTerminalCommandAsync;
+    public event ClientEventHandlerAsync<ReleaseTerminalRequest, ReleaseTerminalResponse>? ReleaseTerminalAsync;
+    public event ClientEventHandlerAsync<TerminalOutputRequest, TerminalOutputResponse>? TerminalOutputAsync;
+    public event ClientEventHandlerAsync<WaitForTerminalExitRequest, WaitForTerminalExitResponse>? WaitForTerminalExitAsync;
+    public event ClientEventHandlerAsync<ReadTextFileRequest, ReadTextFileResponse>? ReadTextFileAsync;
+    public event ClientEventHandlerAsync<WriteTextFileRequest, WriteTextFileResponse>? WriteTextFileAsync;
+    public event ClientEventHandlerAsync2<string, Dictionary<string, object>, Dictionary<string, object>>? ClientExtMethodAsync;
+    public event ClientEventHandlerAsync2<string, Dictionary<string, object>>? ClientExtNotificationAsync;
+    public event ClientEventHandlerAsync<SessionNotification>? SessionUpdateAsync;
+    #endregion
+
     #region Fields
     public readonly AgentConnection connection;
     protected readonly ClientCapabilities clientCapabilities;
     protected readonly Implementation clientInfo;
     protected InitializeResponse? agentInitializeResponse;
     public readonly Dictionary<string, Session> sessions = new Dictionary<string, Session>();
-    protected ulong sessionCounter = 0;
-    protected ulong terminalCounter = 0;
     #endregion   
 }

@@ -300,8 +300,5 @@ namespace OnlyHumans.Acp
     [JsonInheritance("plan", typeof(SessionUpdatePlan))]
     [JsonInheritance("available_commands_update", typeof(SessionUpdateAvailableCommandsUpdate))]
     [JsonInheritance("current_mode_update", typeof(SessionUpdateCurrentModeUpdate))]
-    public partial record SessionUpdate { }
-
-
-    
+    public partial record SessionUpdate { }    
 }

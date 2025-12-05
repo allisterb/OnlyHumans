@@ -1,23 +1,22 @@
 ﻿namespace OnlyHumans.Acp;
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 public class Session : Runtime
 {
+    #region Constructors
     public Session(Agent agent, string sessionId, object agentResponse)
     {
         this.agent = agent;
         this.sessionId = sessionId;
         this.agentResponse = agentResponse;
     }
+    #endregion
 
     #region Methods
     public async Task<Result<SetSessionModelResponse>> SetSessionModel(string modelId)
-        => await this.agent.SetSessionModelAsync(new SetSessionModelRequest() { SessionId = sessionId, ModelId = modelId });
+        => await this.agent.connection.SetSessionModelAsync(new SetSessionModelRequest() { SessionId = sessionId, ModelId = modelId });
        
     public async Task<Result<PromptResponse>> PromptAsync(PromptRequest request, CancellationToken cancellationToken = default)
     {
@@ -37,6 +36,7 @@ public class Session : Runtime
     {
         updates.Push(prompt);
         currentTurn = SessionTurn.Agent;
+        Debug("Updating session state with user prompt {0}...", prompt.Contents.Truncate(16));
     }
 
     internal void UpdateSessionState(SessionUpdate m)
@@ -45,12 +45,22 @@ public class Session : Runtime
         {
             updates.Push(sx.Content);
             currentTurn = SessionTurn.User;
+            Debug("Updating session state with agent response message {0}...", sx.Content.Contents.Truncate(16));
         }
         else if (m is SessionUpdatePlan p)
         {
             updates.Push(p);
             currentTurn = SessionTurn.User;
-        }            
+        }
+        else if (m is SessionUpdateToolCall tc)
+        {
+            updates.Push(tc);
+        }
+        else if (m is SessionUpdateToolCallUpdate tcu)
+        {
+            updates.Push(tcu);
+            currentTurn = SessionTurn.User;
+        }
     }
     #endregion
 

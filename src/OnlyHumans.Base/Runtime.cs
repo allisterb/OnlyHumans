@@ -69,7 +69,7 @@ public abstract class Runtime
 
     public static bool IsUnitTestRun { get; set; }
 
-    public static string RunFile => OnlyHumansDir.CombinePath(ToolName + ".run");
+    public static string RunFile => Path.Combine(OnlyHumansDir, ToolName + ".run");
     #endregion
 
     #region Methods

@@ -36,24 +36,15 @@ public class Agent : Runtime, IDisposable
 
     #region Methods
     public async Task<Result<InitializeResponse>> InitializeAsync(CancellationToken cancellationToken = default) =>
-        await connection.InitializeAsync(new InitializeRequest { ClientCapabilities = clientCapabilities, ClientInfo = clientInfo, ProtocolVersion = 1 }, cancellationToken)
+        await connection.InitializeAsync(new() { ClientCapabilities = clientCapabilities, ClientInfo = clientInfo, ProtocolVersion = 1 }, cancellationToken)
         .Then(Initialize);
 
     public async Task<Result<AuthenticateResponse>> AuthenticateAsync(string methodId, Dictionary<string, object> properties) =>
-        await connection.AuthenticateAsync(new AuthenticateRequest() { MethodId = methodId, _meta = properties });
+        await connection.AuthenticateAsync(new() { MethodId = methodId, _meta = properties });
 
     public async Task<Result<Session>> NewSessionAsync(string cwd, CancellationToken cancellationToken = default) => 
-        await connection.NewSessionAsync(new NewSessionRequest() { Cwd = cwd }, cancellationToken)
-        .Then(NewSession);
+        await connection.NewSessionAsync(new() { Cwd = cwd }, cancellationToken).Then(NewSession);
 
-    public async Task<Result<SetSessionModelResponse>> SetSessionModelAsync(SetSessionModelRequest request, CancellationToken cancellationToken = default) =>
-        await connection.SetSessionModelAsync(request, cancellationToken)
-        .Then(SetSessionModel);
-
-    public async Task<bool> SetSessionModelAsync(string sessionid, string modelid, CancellationToken cancellationToken = default) =>
-        await SetSessionModelAsync(new SetSessionModelRequest() { SessionId = sessionid, ModelId = modelid }, cancellationToken)
-        .IsSuccess();
-                 
     public Agent WithName(string name)
     {
         Name = name;
@@ -89,16 +80,14 @@ public class Agent : Runtime, IDisposable
     protected Session NewSession(NewSessionResponse r)
         => this.sessions.AddReturn(r.SessionId, new Session(this, r.SessionId, r));
 
+    #region Event handlers
     protected Task UpdateSessionState(SessionNotification notification)
     {
         var session = sessions[notification.SessionId];
         session.UpdateSessionState(notification.Update);
-        return this.SessionUpdateAsync?.Invoke(notification) ?? Task.CompletedTask;
+        return SessionUpdateAsync?.Invoke(notification) ?? Task.CompletedTask;
     }
-    protected SetSessionModelResponse SetSessionModel(SetSessionModelResponse r)
-    {
-        return r;
-    }
+    #endregion
 
     #endregion
 

@@ -1,5 +1,7 @@
 ﻿namespace OnlyHumans.Acp;
 
+using Newtonsoft.Json;
+
 public partial record ClientCapabilities
 {
     public static ClientCapabilities Default = new ClientCapabilities()
@@ -15,18 +17,41 @@ public partial record ClientCapabilities
 
 public partial record PromptRequest : IContentBlock
 {
-    public string Contents => this.Prompt.Select(e => e.Contents).JoinWith(Environment.NewLine);
+    [JsonIgnore]
+    public string Contents => Prompt.Select(e => e.Contents).JoinWith(Environment.NewLine);
 }
 
 public partial record ContentBlock : IContentBlock
 {
     public static ContentBlockText _Text(string text) => new ContentBlockText() { Text = text };
-    public string Contents => this.ToString();
+
+    [JsonIgnore]
+    public string Contents => this switch { 
+        ContentBlockText text => text.Text,
+        ContentBlockImage image => image.Data,
+        ContentBlockAudio audio => audio.Data,  
+        ContentBlockResource resource => resource.ToString(),
+        ContentBlockResourceLink link => link.Uri,
+        _ => throw new NotImplementedException()
+    };
 }
 
 public partial record SessionUpdatePlan : IContentBlock
 {
-    public string Contents => this.Entries.Select(e => e.Content).JoinWith(Environment.NewLine);  
+    [JsonIgnore]
+    public string Contents => Entries.Select(e => e.Content).JoinWith(Environment.NewLine);  
+}
+
+public partial record SessionUpdateToolCall : IContentBlock
+{
+    [JsonIgnore]
+    public string Contents => $"{Kind} {Title}({ToolCallId})";
+}
+
+public partial record SessionUpdateToolCallUpdate : IContentBlock
+{
+    [JsonIgnore] 
+    public string Contents => $"{Kind} {Title}({ToolCallId}) {Status}";
 }
 
 public partial record StopReason

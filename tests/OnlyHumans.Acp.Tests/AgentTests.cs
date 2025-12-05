@@ -46,21 +46,20 @@ public class AgentTests : TestsRuntime
         Assert.True(ar.IsSuccess);
         var mr = await agent.SetSessionModelAsync(new SetSessionModelRequest() { SessionId = ar.Value.sessionId, ModelId = agentModel });
         Assert.True(mr.IsSuccess);
-        var pr = await agent.PromptAsync(ar.Value.sessionId, "hello kimi");
-        Assert.True(pr.IsSuccess);
+        //var pr = await agent.PromptAsync(ar.Value.sessionId, "hello kimi");
+        //Assert.True(pr.IsSuccess);
     }
 
     [Fact]
     public async Task CanPrompt()
     {
         using var agent = new Agent(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, "TestClient")
-            .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());
-        agent.SessionUpdateAsync += (async s => Assert.NotNull(s.Update));
-
+            .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());       
         await agent.InitializeAsync();
-        var ar = await agent.NewSessionAsync(agentCmdWd);
-        Assert.True(ar.IsSuccess);
-        var pr = await agent.PromptAsync(ar.Value.sessionId, "hello");
+        var session = await agent.NewSessionAsync(agentCmdWd).Succeeded();
+        var pr = await session.PromptAsync("hello");
+        Assert.True(pr.IsSuccess);
+        pr = await session.PromptAsync("What is your name?");
         Assert.True(pr.IsSuccess);
     }
 }

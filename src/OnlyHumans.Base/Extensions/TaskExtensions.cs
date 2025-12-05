@@ -32,7 +32,32 @@ public static class TaskExtensions
         });
     }
 
-    public static Task<bool> Succeeded<T>(this Task<Result<T>> resultTask) =>
+    public static Task<bool> IsSuccess<T>(this Task<Result<T>> resultTask) =>
         resultTask.ContinueWith(t => t.IsCompletedSuccessfully && t.Result.IsSuccess);
+
+    public static Task<T> Succeeded<T>(this Task<Result<T>> resultTask) =>
+       resultTask.ContinueWith(t =>
+       {
+           if (t.IsCompletedSuccessfully)
+           {
+               if (t.Result.IsSuccess)
+               {
+                   return t.Result.Value;
+               }
+               else if (t.Result.Exception is not null)
+               {
+                   throw t.Result.Exception;
+               }
+               else throw new InvalidOperationException();
+           }
+           else if (t.Exception is not null)
+           {
+               throw t.Exception;
+           }
+           else
+           {
+               throw new InvalidOperationException();
+           }
+       });
 }
 

@@ -41,20 +41,6 @@ public interface IAgentConnection
     event ClientEventHandlerAsync2<string, Dictionary<string, object>> ClientExtNotificationAsync;
 }
 
-
-public partial record ClientCapabilities
-{
-    public static ClientCapabilities Default = new ClientCapabilities()
-    {
-        Fs = new FileSystemCapability()
-        {
-            ReadTextFile = true,
-            WriteTextFile = true
-        },
-        Terminal = true,
-    };
-}
-
 public class AgentNotInitializedException : InvalidOperationException
 {
     public AgentNotInitializedException() : base("Agent not initialized. Call InitializeAsync first.") { }

@@ -177,7 +177,6 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
             this.conn = conn;
         }
 
-        #region RPC events
         [JsonRpcMethod("session/update", UseSingleObjectParameterDeserialization = true)]
         public Task SessionUpdateAsync(SessionNotification request) => conn.SessionUpdateAsync?.Invoke(request) ?? NotImplementedAsync();
 
@@ -212,8 +211,6 @@ public class AgentConnection : Runtime, IDisposable, IAgentConnection
         [JsonRpcMethod("fs/write_text_file", UseSingleObjectParameterDeserialization = true)]
         public Task<WriteTextFileResponse> WriteTextFileAsync(WriteTextFileRequest request)
             => conn.WriteTextFileAsync?.Invoke(request) ?? NotImplementedAsync<WriteTextFileResponse>();
-
-        #endregion
 
         AgentConnection conn;
     }

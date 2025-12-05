@@ -41,6 +41,11 @@ public interface IAgentConnection
     event ClientEventHandlerAsync2<string, Dictionary<string, object>> ClientExtNotificationAsync;
 }
 
+public interface IContentBlock
+{
+    string Contents { get; }
+}
+
 public class AgentNotInitializedException : InvalidOperationException
 {
     public AgentNotInitializedException() : base("Agent not initialized. Call InitializeAsync first.") { }

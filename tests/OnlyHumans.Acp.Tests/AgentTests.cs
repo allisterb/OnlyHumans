@@ -19,8 +19,7 @@ public class AgentTests : TestsRuntime
     {
         using var agent = new Agent(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, "TestClient")
             .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());
-        var r = await agent.InitializeAsync();  
-        Assert.True(r.IsSuccess);
+        Assert.True(await agent.InitializeAsync().IsSuccess());
         var s = await agent.NewSessionAsync(agentCmdWd);
         Assert.True(s.IsSuccess);
         Assert.NotNull(s.Value.sessionId);

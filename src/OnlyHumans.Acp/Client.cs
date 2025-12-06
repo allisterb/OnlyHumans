@@ -38,15 +38,15 @@ public class Client : Runtime, IDisposable
     #endregion
 
     #region Methods
-    public async Task<Result<InitializeResponse>> InitializeAsync(CancellationToken cancellationToken = default) =>
-        await connection.InitializeAsync(new() { ClientCapabilities = clientCapabilities, ClientInfo = clientInfo, ProtocolVersion = 1 }, cancellationToken)
+    public Task<Result<InitializeResponse>> InitializeAsync(CancellationToken cancellationToken = default) =>
+        connection.InitializeAsync(new() { ClientCapabilities = clientCapabilities, ClientInfo = clientInfo, ProtocolVersion = 1 }, cancellationToken)
         .Then(Initialize);
 
-    public async Task<Result<AuthenticateResponse>> AuthenticateAsync(string methodId, Dictionary<string, object> properties) =>
-        await connection.AuthenticateAsync(new() { MethodId = methodId, _meta = properties });
+    public Task<Result<AuthenticateResponse>> AuthenticateAsync(string methodId, Dictionary<string, object> properties) =>
+        connection.AuthenticateAsync(new() { MethodId = methodId, _meta = properties });
 
-    public async Task<Result<Session>> NewSessionAsync(string cwd, CancellationToken cancellationToken = default) => 
-        await connection.NewSessionAsync(new() { Cwd = cwd }, cancellationToken).Then(NewSession);
+    public Task<Result<Session>> NewSessionAsync(string cwd, CancellationToken cancellationToken = default) => 
+        connection.NewSessionAsync(new() { Cwd = cwd }, cancellationToken).Then(NewSession);
 
     public Client WithAgentName(string name)
     {

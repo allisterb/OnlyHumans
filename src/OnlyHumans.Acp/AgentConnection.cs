@@ -80,35 +80,35 @@ public class AgentConnection : Runtime, IDisposable, IAgent, IClientEvents
     #region Methods
 
     #region Agent Methods
-    public async Task<Result<InitializeResponse>> InitializeAsync(InitializeRequest request, CancellationToken cancellationToken = default)
-       => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<InitializeResponse>("initialize", request, cancellationToken));
+    public Task<Result<InitializeResponse>> InitializeAsync(InitializeRequest request, CancellationToken cancellationToken = default)
+       => ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<InitializeResponse>("initialize", request, cancellationToken));
 
-    public async Task<Result<AuthenticateResponse>> AuthenticateAsync(AuthenticateRequest request, CancellationToken cancellationToken = default)
-        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<AuthenticateResponse>("authenticate", request, cancellationToken));
+    public Task<Result<AuthenticateResponse>> AuthenticateAsync(AuthenticateRequest request, CancellationToken cancellationToken = default)
+        => ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<AuthenticateResponse>("authenticate", request, cancellationToken));
 
-    public async Task<Result<NewSessionResponse>> NewSessionAsync(NewSessionRequest request, CancellationToken cancellationToken = default)
-        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<NewSessionResponse>("session/new", request, cancellationToken));
+    public Task<Result<NewSessionResponse>> NewSessionAsync(NewSessionRequest request, CancellationToken cancellationToken = default)
+        => ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<NewSessionResponse>("session/new", request, cancellationToken));
 
-    public async Task<Result<LoadSessionResponse>> LoadSessionAsync(LoadSessionRequest request, CancellationToken cancellationToken = default)
-        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<LoadSessionResponse>("session/load", request, cancellationToken));
+    public Task<Result<LoadSessionResponse>> LoadSessionAsync(LoadSessionRequest request, CancellationToken cancellationToken = default)
+        => ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<LoadSessionResponse>("session/load", request, cancellationToken));
 
-    public async Task<Result<PromptResponse>> PromptAsync(PromptRequest request, CancellationToken cancellationToken = default)
-        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<PromptResponse>("session/prompt", request, cancellationToken));
+    public Task<Result<PromptResponse>> PromptAsync(PromptRequest request, CancellationToken cancellationToken = default)
+        => ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<PromptResponse>("session/prompt", request, cancellationToken));
 
-    public async Task<Result<SetSessionModeResponse>> SetSessionModeAsync(SetSessionModeRequest request, CancellationToken cancellationToken = default)
-        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<SetSessionModeResponse>("session/set_mode", request, cancellationToken));
+    public Task<Result<SetSessionModeResponse>> SetSessionModeAsync(SetSessionModeRequest request, CancellationToken cancellationToken = default)
+        => ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<SetSessionModeResponse>("session/set_mode", request, cancellationToken));
 
-    public async Task<Result<SetSessionModelResponse>> SetSessionModelAsync(SetSessionModelRequest request, CancellationToken cancellationToken = default)
-        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<SetSessionModelResponse>("session/set_model", request, cancellationToken));
+    public Task<Result<SetSessionModelResponse>> SetSessionModelAsync(SetSessionModelRequest request, CancellationToken cancellationToken = default)
+        => ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<SetSessionModelResponse>("session/set_model", request, cancellationToken));
 
-    public async Task CancelNotificationAsync(CancelNotification notification)
-        => await jsonrpc.NotifyAsync("session/cancel", notification);
+    public Task CancelNotificationAsync(CancelNotification notification)
+        => jsonrpc.NotifyAsync("session/cancel", notification);
 
-    public async Task<Result<Dictionary<string, object>>> ExtMethodAsync(string method, Dictionary<string, object>? parameters = null, CancellationToken cancellationToken = default)
-        => await ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<Dictionary<string, object>>(method, parameters, cancellationToken));
+    public Task<Result<Dictionary<string, object>>> ExtMethodAsync(string method, Dictionary<string, object>? parameters = null, CancellationToken cancellationToken = default)
+        => ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<Dictionary<string, object>>(method, parameters, cancellationToken));
 
-    public async Task<Result<None>> ExtNotificationAsync(string notification, Dictionary<string, object>? parameters = null)
-        => await ExecuteAsync(jsonrpc.NotifyAsync(notification, parameters));
+    public Task<Result<None>> ExtNotificationAsync(string notification, Dictionary<string, object>? parameters = null)
+        => ExecuteAsync(jsonrpc.NotifyAsync(notification, parameters));
     #endregion
 
     public void Stop()

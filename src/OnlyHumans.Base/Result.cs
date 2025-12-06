@@ -42,18 +42,23 @@ public struct Result<T>
 
     public static Result<T> Failure(string? message, Exception? exception = null) => new Result<T>(ResultType.Failure, message: message, exception: exception);
 
-    public static async Task<Result<T>> ExecuteAsync(Task<T> task, string? errorMessage = null)
-    {
-        try
-        {
-            return Success(await task);
-        }
-        catch (Exception ex)
-        {
-            return Failure(errorMessage, ex);
-        }
-    }
-   
+    public static Task<Result<T>> ExecuteAsync(Task<T> task, string? errorMessage = null)
+        => task.ContinueWith(t =>
+           {
+               if (t.IsCompletedSuccessfully)
+               {
+                   return Success(t.Result);
+               }
+               else if (t.IsFaulted)
+               {
+                   return Failure(errorMessage, t.Exception);
+               }
+               else
+               {
+                   return Failure("The task was canceled or did not complete.");
+               }
+           });
+       
     public ResultType Type;
     public T? _Value;
     public string? Message;
@@ -133,19 +138,23 @@ public static class Result
         return r;
     }
 
-    public static async Task<Result<None>> ExecuteAsync(Task task, string? errorMessage = null)
-    {
-        try
+    public static Task<Result<None>> ExecuteAsync(Task task, string? errorMessage = null)
+        => task.ContinueWith(t =>
         {
-            await task;
-            return Result<None>.Success(None.Value);
-        }
-        catch (Exception ex)
-        {
-            return Result<None>.Failure(errorMessage, ex);
-        }
-    }
-
+            if (t.IsCompletedSuccessfully)
+            {
+                return Result<None>.Success(None.Value);
+            }
+            else if (t.IsFaulted)
+            {
+                return Result<None>.Success(None.Value);
+            }
+            else
+            {
+                return Failure<None>("The task was canceled or did not complete.");
+            }
+        });
+   
     public static T ResultOrFail<T>(Result<T> result) => result.IsSuccess ? result.Value : throw new Exception("The operation failed: " + result.Message, result.Exception);
 
     public static async Task<T> ResultOrFail<T>(Task<Result<T>> result) => (await result).IsSuccess ? result.Result.Value : throw new Exception("The operation failed: " + result.Result.Message, result.Result.Exception);

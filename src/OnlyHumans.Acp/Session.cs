@@ -15,17 +15,17 @@ public class Session : Runtime
     #endregion
 
     #region Methods
-    public async Task<Result<SetSessionModelResponse>> SetSessionModel(string modelId)
-        => await this.agent.connection.SetSessionModelAsync(new SetSessionModelRequest() { SessionId = sessionId, ModelId = modelId });
+    public Task<Result<SetSessionModelResponse>> SetSessionModel(string modelId)
+        => this.agent.connection.SetSessionModelAsync(new SetSessionModelRequest() { SessionId = sessionId, ModelId = modelId });
        
-    public async Task<Result<PromptResponse>> PromptAsync(PromptRequest request, CancellationToken cancellationToken = default)
+    public Task<Result<PromptResponse>> PromptAsync(PromptRequest request, CancellationToken cancellationToken = default)
     {
         UpdateSessionState(request);
-        return await agent.connection.PromptAsync(request, cancellationToken);
+        return agent.connection.PromptAsync(request, cancellationToken);
     }
         
-    public async Task<Result<PromptResponse>> PromptAsync(string prompt, CancellationToken cancellationToken = default) =>
-       await PromptAsync(new PromptRequest() { SessionId = sessionId, Prompt = { ContentBlock._Text(prompt) } }, cancellationToken);
+    public Task<Result<PromptResponse>> PromptAsync(string prompt, CancellationToken cancellationToken = default) =>
+       PromptAsync(new PromptRequest() { SessionId = sessionId, Prompt = { ContentBlock._Text(prompt) } }, cancellationToken);
 
 
     internal void UpdateSessionState(PromptRequest prompt)

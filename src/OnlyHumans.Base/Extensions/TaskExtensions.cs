@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 
 public static class TaskExtensions
 {
-    public static Task<T> NotImplementedException<T>(this Task<T> task) => Task.FromException<T>(new NotImplementedException());
-
     public static Task<Result<U>> Then<T, U>(this Task<Result<T>> resultTask, Func<T, U> func)
     {
         return resultTask.ContinueWith(t =>
@@ -25,9 +23,13 @@ public static class TaskExtensions
                     return Result<U>.Failure(t.Result.Message, t.Result.Exception);
                 }
             }
-            else
+            else if (t.IsFaulted)     
             {
                 return Result<U>.Failure(null, t.Exception);
+            }
+            else
+            {
+                return Result<U>.Failure("The operation was canceled or otherwise failed to complete.");
             }
         });
     }

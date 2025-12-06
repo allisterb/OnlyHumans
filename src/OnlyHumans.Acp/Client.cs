@@ -4,15 +4,18 @@ using System.Diagnostics;
 
 using static Result;
 
-public class Agent : Runtime, IDisposable
+/// <summary>
+/// Connect to an agent using the ACP JSON-RPC protocol.
+/// </summary>
+public class Client : Runtime, IDisposable
 {
     #region Constructors
-    public Agent(AgentConnection agentConnection, Implementation clientInfo, ClientCapabilities clientCapabilities, string? name = null)
+    public Client(AgentConnection agentConnection, Implementation clientInfo, ClientCapabilities clientCapabilities, string? agentName = null)
     {
         this.connection = agentConnection;
         this.clientInfo = clientInfo;
         this.clientCapabilities = clientCapabilities;
-        this.Name = name;
+        this.AgentName = agentName;
 
         this.connection.SessionUpdateAsync += UpdateSessionState;
         this.connection.RequestPermissionAsync += (req) => this.RequestPermissionAsync?.Invoke(req) ?? NotImplementedAsync<RequestPermissionResponse>();
@@ -27,11 +30,11 @@ public class Agent : Runtime, IDisposable
         this.connection.ClientExtNotificationAsync += (method, dict) => this.ClientExtNotificationAsync?.Invoke(method, dict) ?? NotImplementedAsync();
     }
     
-    public Agent(AgentConnection agentConnection, string clientName, string clientVersion = "1.0", string? clientTitle=null, string? name=null)
-        : this(agentConnection, new Implementation() { Name = clientName, Version = clientVersion, Title = clientTitle}, ClientCapabilities.Default, name) { }
+    public Client(AgentConnection agentConnection, string clientName, string clientVersion = "1.0", string? clientTitle=null, string? agentName=null)
+        : this(agentConnection, new Implementation() { Name = clientName, Version = clientVersion, Title = clientTitle}, ClientCapabilities.Default, agentName) { }
 
-    public Agent(string cmd, string arguments, string workingDirectory, IDictionary<string, string?>? environmentVariables = null, string clientName = "", string clientVersion = "1.0", string? clientTitle = null, string? name = null) :
-        this(new AgentConnection(cmd, arguments, workingDirectory, environmentVariables), clientName, clientVersion, clientTitle, name) { }    
+    public Client(string cmd, string arguments, string workingDirectory, IDictionary<string, string?>? environmentVariables = null, string clientName = "", string clientVersion = "1.0", string? clientTitle = null, string? agentName = null) :
+        this(new AgentConnection(cmd, arguments, workingDirectory, environmentVariables), clientName, clientVersion, clientTitle, agentName) { }    
     #endregion
 
     #region Methods
@@ -45,9 +48,9 @@ public class Agent : Runtime, IDisposable
     public async Task<Result<Session>> NewSessionAsync(string cwd, CancellationToken cancellationToken = default) => 
         await connection.NewSessionAsync(new() { Cwd = cwd }, cancellationToken).Then(NewSession);
 
-    public Agent WithName(string name)
+    public Client WithAgentName(string name)
     {
-        Name = name;
+        AgentName = name;
         return this;
     }
 
@@ -57,7 +60,7 @@ public class Agent : Runtime, IDisposable
     /// <param name="sourceLevel">Trace level</param>
     /// <param name="listeners">Trace listeners to add</param>
     /// <returns></returns>
-    public Agent WithConnectionTracing(SourceLevels sourceLevel, params TraceListener[] listeners)
+    public Client WithConnectionTracing(SourceLevels sourceLevel, params TraceListener[] listeners)
     {
         connection.TraceLevel = sourceLevel;
         if (listeners != null)
@@ -78,7 +81,7 @@ public class Agent : Runtime, IDisposable
     protected InitializeResponse Initialize(InitializeResponse r) => this.agentInitializeResponse = r;
 
     protected Session NewSession(NewSessionResponse r)
-        => this.sessions.AddReturn(r.SessionId, new Session(this, r.SessionId, r));
+        => this.sessions[r.SessionId] = new Session(this, r.SessionId, r);
 
     #region Event handlers
     protected Task UpdateSessionState(SessionNotification notification)
@@ -92,7 +95,7 @@ public class Agent : Runtime, IDisposable
     #endregion
 
     #region Properties
-    public string? Name { get; private set; }
+    public string? AgentName { get; private set; }
 
     public bool IsInitialized => agentInitializeResponse != null && agentInitializeResponse.ProtocolVersion  == 1;
 

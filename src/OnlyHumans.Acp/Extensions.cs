@@ -15,18 +15,19 @@ public partial record ClientCapabilities
     };
 }
 
-public partial record PromptRequest : IContentBlock
+public partial record PromptRequest : ITurn
 {
     [JsonIgnore]
-    public string Contents => Prompt.Select(e => e.Contents).JoinWith(Environment.NewLine);
+    public Role Role { get; } = Role.User;
+
+    [JsonIgnore]
+    public string Message => Prompt.Select(e => e.Message).JoinWith(Environment.NewLine);
 }
 
-public partial record ContentBlock : IContentBlock
+public partial record ContentBlock 
 {
-    public static ContentBlockText _Text(string text) => new ContentBlockText() { Text = text };
-
     [JsonIgnore]
-    public string Contents => this switch { 
+    public string Message => this switch { 
         ContentBlockText text => text.Text,
         ContentBlockImage image => image.Data,
         ContentBlockAudio audio => audio.Data,  
@@ -34,27 +35,41 @@ public partial record ContentBlock : IContentBlock
         ContentBlockResourceLink link => link.Uri,
         _ => throw new NotImplementedException()
     };
+
+    public static ContentBlockText _Text(string text) => new () { Text = text };   
 }
 
-public partial record SessionUpdatePlan : IContentBlock
+public partial record SessionUpdateAgentMessageChunk : ITurn
 {
     [JsonIgnore]
-    public string Contents => Entries.Select(e => e.Content).JoinWith(Environment.NewLine);  
+    public Role Role { get; } = Role.Assistant;
+    [JsonIgnore]
+    public string Message => Content.Message;
 }
 
-public partial record SessionUpdateToolCall : IContentBlock
+public partial record SessionUpdatePlan : ITurn
 {
     [JsonIgnore]
-    public string Contents => $"{Kind} {Title}({ToolCallId})";
+    public Role Role { get; } = Role.Assistant;
+    
+    [JsonIgnore]
+    public string Message => Entries.Select(e => e.Content).JoinWith(Environment.NewLine);  
 }
 
-public partial record SessionUpdateToolCallUpdate : IContentBlock
+public partial record SessionUpdateToolCall : ITurn
 {
+    [JsonIgnore]
+    public Role Role { get; } = Role.Assistant;
+    [JsonIgnore]
+    public string Message => $"{Kind} {Title}({ToolCallId})";
+}
+
+public partial record SessionUpdateToolCallUpdate : ITurn
+{
+    [JsonIgnore]
+    public Role Role { get; } = Role.Assistant;
+
     [JsonIgnore] 
-    public string Contents => $"{Kind} {Title}({ToolCallId}) {Status}";
+    public string Message => $"{Kind} {Title}({ToolCallId}) {Status}";
 }
 
-public partial record StopReason
-{        
-    public const string EndTurn = "end_turn";   
-}

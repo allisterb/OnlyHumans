@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 public class Session : Runtime
 {
     #region Constructors
-    public Session(Agent agent, string sessionId, object agentResponse)
+    public Session(Client agent, string sessionId, object agentResponse)
     {
         this.agent = agent;
         this.sessionId = sessionId;
@@ -20,12 +20,8 @@ public class Session : Runtime
        
     public async Task<Result<PromptResponse>> PromptAsync(PromptRequest request, CancellationToken cancellationToken = default)
     {
-        var r = await agent.connection.PromptAsync(request, cancellationToken);
-        if (r.IsSuccess && r.Value.StopReason == StopReason.EndTurn)
-        {
-            UpdateSessionState(request);
-        }
-        return r;
+        UpdateSessionState(request);
+        return await agent.connection.PromptAsync(request, cancellationToken);
     }
         
     public async Task<Result<PromptResponse>> PromptAsync(string prompt, CancellationToken cancellationToken = default) =>
@@ -36,16 +32,15 @@ public class Session : Runtime
     {
         updates.Push(prompt);
         currentTurn = SessionTurn.Agent;
-        Debug("Updating session state with user prompt {0}...", prompt.Contents.Truncate(16));
+        Debug("Updating session state with user prompt {0}...", prompt.Message.Truncate(16));
     }
 
     internal void UpdateSessionState(SessionUpdate m)
     {        
         if (m is SessionUpdateAgentMessageChunk sx)
         {
-            updates.Push(sx.Content);
-            currentTurn = SessionTurn.User;
-            Debug("Updating session state with agent response message {0}...", sx.Content.Contents.Truncate(16));
+            updates.Push(sx);
+            Debug("Updating session state with agent response message {0}...", sx.Content.Message.Truncate(16));
         }
         else if (m is SessionUpdatePlan p)
         {
@@ -65,11 +60,11 @@ public class Session : Runtime
     #endregion
 
     #region Fields
-    public readonly Agent agent;
+    public readonly Client agent;
     public readonly string sessionId;
     public readonly object agentResponse;
     public string? model;
-    public readonly Stack<IContentBlock> updates = new Stack<IContentBlock>();   
+    public readonly Stack<ITurn> updates = new Stack<ITurn>();   
     public SessionTurn currentTurn = SessionTurn.User;
     #endregion
 

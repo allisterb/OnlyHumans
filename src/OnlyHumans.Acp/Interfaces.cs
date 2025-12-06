@@ -11,8 +11,10 @@ public delegate Task ClientEventHandlerAsync2<T, U>(T e1, U e2);
 
 public delegate Task<V> ClientEventHandlerAsync2<T, U, V>(T e1, U e2);
 
-// Agent connection interface: methods the client can call on the agent and events the agent can raise to the client
-public interface IAgentConnection
+/// <summary>
+/// Methods the client can call agent-side.
+/// </summary>
+public interface IAgent
 {
     Task<Result<InitializeResponse>> InitializeAsync(InitializeRequest request, CancellationToken cancellationToken = default);
     Task<Result<AuthenticateResponse>> AuthenticateAsync(AuthenticateRequest request, CancellationToken cancellationToken = default);
@@ -25,8 +27,14 @@ public interface IAgentConnection
     // Extension method for custom RPC calls
     Task<Result<Dictionary<string, object>>> ExtMethodAsync(string method, Dictionary<string, object>? parameters = null, CancellationToken cancellationToken = default);
     // Extension notification for custom notifications
-    Task<Result<None>> ExtNotificationAsync(string notification, Dictionary<string, object>? parameters = null);
+    Task<Result<None>> ExtNotificationAsync(string notification, Dictionary<string, object>? parameters = null);   
+}
 
+/// <summary>
+/// Events the agent can raise client-side.
+/// </summary>
+public interface IClientEvents
+{
     event ClientEventHandlerAsync<SessionNotification> SessionUpdateAsync;
     event ClientEventHandlerAsync<RequestPermissionRequest, RequestPermissionResponse> RequestPermissionAsync;
     event ClientEventHandlerAsync<CreateTerminalRequest, CreateTerminalResponse> CreateTerminalAsync;
@@ -41,9 +49,13 @@ public interface IAgentConnection
     event ClientEventHandlerAsync2<string, Dictionary<string, object>> ClientExtNotificationAsync;
 }
 
-public interface IContentBlock
+/// <summary>
+/// A turn of a conversation between a user and an assistant.
+/// </summary>
+public interface ITurn
 {
-    string Contents { get; }
+    Role Role { get; }  
+    string Message { get; }
 }
 
 public class AgentNotInitializedException : InvalidOperationException

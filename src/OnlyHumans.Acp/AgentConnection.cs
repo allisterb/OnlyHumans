@@ -12,7 +12,7 @@ using StreamJsonRpc;
 
 using static Result;
 
-public class AgentConnection : Runtime, IDisposable, IAgentConnection
+public class AgentConnection : Runtime, IDisposable, IAgent, IClientEvents
 {
     #region Constructors
     public AgentConnection(string cmd, string? arguments = null, string? workingDirectory = null, IDictionary<string, string?>? environmentVariables = null, SourceLevels traceLevel = SourceLevels.Information, TraceListener? traceListener = null, bool monitorIO = false)

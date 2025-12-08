@@ -5,12 +5,12 @@ using System.Diagnostics;
 using static Result;
 
 /// <summary>
-/// Connect to an agent using the ACP JSON-RPC protocol.
+/// A client that connects to an agent using the ACP JSON-RPC protocol.
 /// </summary>
 public class Client : Runtime, IDisposable
 {
     #region Constructors
-    public Client(AgentConnection agentConnection, Implementation clientInfo, ClientCapabilities clientCapabilities, string? agentName = null)
+    public Client(AgentConnection agentConnection, string? agentName, Implementation clientInfo, ClientCapabilities clientCapabilities)
     {
         this.connection = agentConnection;
         this.clientInfo = clientInfo;
@@ -30,11 +30,11 @@ public class Client : Runtime, IDisposable
         this.connection.ClientExtNotificationAsync += (method, dict) => this.ClientExtNotificationAsync?.Invoke(method, dict) ?? NotImplementedAsync();
     }
     
-    public Client(AgentConnection agentConnection, string clientName, string clientVersion = "1.0", string? clientTitle=null, string? agentName=null)
-        : this(agentConnection, new Implementation() { Name = clientName, Version = clientVersion, Title = clientTitle}, ClientCapabilities.Default, agentName) { }
+    public Client(AgentConnection agentConnection, string? agentName = null, string clientName = "", string clientVersion = "1.0", string clientTitle="")
+        : this(agentConnection, agentName, new Implementation() { Name = clientName, Version = clientVersion, Title = clientTitle}, ClientCapabilities.Default) { }
 
-    public Client(string cmd, string arguments, string workingDirectory, IDictionary<string, string?>? environmentVariables = null, string clientName = "", string clientVersion = "1.0", string? clientTitle = null, string? agentName = null) :
-        this(new AgentConnection(cmd, arguments, workingDirectory, environmentVariables), clientName, clientVersion, clientTitle, agentName) { }    
+    public Client(string agentCmd, string agentCmdArgs, string agentCmdWorkingDirectory, IDictionary<string, string?>? agentCmdEnvVars = null, string? agentName = null, string clientName = "", string clientVersion = "1.0", string clientTitle = "") :
+        this(new AgentConnection(agentCmd, agentCmdArgs, agentCmdWorkingDirectory, agentCmdEnvVars), agentName, clientName, clientVersion, clientTitle) { }    
     #endregion
 
     #region Methods

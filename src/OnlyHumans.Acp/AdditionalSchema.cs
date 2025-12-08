@@ -113,6 +113,10 @@ public partial record ContentBlockResource : ContentBlock
     public EmbeddedResourceResource Resource { get; set; } = new EmbeddedResourceResource();
 }
 
+public partial record TextResourceContents : EmbeddedResourceResource {}
+
+public partial record BlobResourceContents : EmbeddedResourceResource {}
+
 [JsonInheritance("text", typeof(ContentBlockText))]
 [JsonInheritance("image", typeof(ContentBlockImage))]
 [JsonInheritance("audio", typeof(ContentBlockAudio))]
@@ -290,6 +294,7 @@ public partial record SessionUpdateCurrentModeUpdate : SessionUpdate
     [JsonProperty("sessionUpdate", Required = Required.Always)]        
     public string SessionUpdateType { get; set; } = "current_mode_update";
 }
+
 
 [JsonInheritance("user_message_chunk", typeof(SessionUpdateUserMessageChunk))]
 [JsonInheritance("agent_message_chunk", typeof(SessionUpdateAgentMessageChunk))]

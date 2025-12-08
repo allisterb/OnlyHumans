@@ -1,31 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace OnlyHumans.Acp.Tests;
+
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net.Mail;
+using System.Net.Mime;
 
-namespace OnlyHumans.Acp.Tests
+public class SessionTests : TestsRuntime
 {
-    public class SessionTests : TestsRuntime
+    static SessionTests()
     {
-        static SessionTests()
-        {
-            client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd)
-                .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener()); ;
-            client.InitializeAsync().Succeeded().Wait();
-        }
-
-        
-        [Fact]
-        public async Task CanSetModel()
-        {
-            var sess = await client.NewSessionAsync(agentCmdWd).Succeeded();
-            var ar = await sess.PromptAsync("Hello");
-            Assert.True(ar.IsSuccess);  
-        }
-        
-        static Client client;
+        client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd)
+            .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener()); ;
+        client.InitializeAsync().Succeeded().Wait();
     }
+    
+    [Fact]
+    public async Task CanPrompt()
+    {
+        var sess = await client.NewSessionAsync(agentCmdWd).Succeeded();
+        Assert.True(sess.CurrentTurnRole == Role.User);
+        var ar = await sess.PromptAsync("Hello").Succeeded();
+        var br = await sess.PromptAsync([
+            ContentBlock._Text("Can you analyze this code for potential issues?"),
+            ContentBlock.TextResource("text/x-python", "def process_data(items):\n    for item in items:\n        print(item)", new Uri("file:///home/user/project/main.py")) 
+        ]);
+        Assert.True(br.IsSuccess);
+
+    }
+    
+    static Client client;
 }

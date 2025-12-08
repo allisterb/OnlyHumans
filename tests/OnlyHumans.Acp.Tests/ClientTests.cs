@@ -7,7 +7,7 @@ public class ClientTests : TestsRuntime
     [Fact]
     public async Task CanInitialize()
     {
-        using var client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, "TestClient")
+        using var client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, clientName: "TestClient")
             .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());
         var r = await client.InitializeAsync();
         Assert.True(r.IsSuccess);
@@ -17,7 +17,7 @@ public class ClientTests : TestsRuntime
     [Fact]
     public async Task CanCreateSession()
     {
-        using var client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, "TestClient")
+        using var client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, clientName: "TestClient")
             .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());
         Assert.True(await client.InitializeAsync().IsSuccess());
         var s = await client.NewSessionAsync(agentCmdWd);
@@ -25,10 +25,10 @@ public class ClientTests : TestsRuntime
         Assert.NotNull(s.Value.sessionId);
     }
 
-    [Fact]
-    public async Task CanAuthenticate()
+    [Fact]    
+    async Task CanAuthenticate()
     {
-        using var client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, "TestClient")
+        using var client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, clientName: "TestClient")
             .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());
         var r = await client.InitializeAsync();
         var ar = await client.AuthenticateAsync("api_key", new Dictionary<string, object> { { "apiKey", agentApiKey } });
@@ -38,7 +38,7 @@ public class ClientTests : TestsRuntime
     [Fact]
     public async Task CanPrompt()
     {
-        using var client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, "TestClient")
+        using var client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, clientName: "TestClient")
             .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());       
         Assert.True(await client.InitializeAsync().IsSuccess());
         var session = await client.NewSessionAsync(agentCmdWd).Succeeded();

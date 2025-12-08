@@ -14,6 +14,12 @@ public class Session : Runtime
     }
     #endregion
 
+    #region Properties
+    public Role CurrentTurnRole => (turns.PeekIfNotEmpty() is null or PromptResponse) ? Role.User : Role.Assistant;
+
+    public bool CurrentTurnIsTool => CurrentTurnRole == Role.Assistant && turns.Peek() is SessionUpdateToolCall or SessionUpdateToolCallUpdate;
+    #endregion
+
     #region Methods
     public Task<Result<SetSessionModelResponse>> SetSessionModel(string modelId)
         => this.agent.connection.SetSessionModelAsync(new SetSessionModelRequest() { SessionId = sessionId, ModelId = modelId });
@@ -21,40 +27,47 @@ public class Session : Runtime
     public Task<Result<PromptResponse>> PromptAsync(PromptRequest request, CancellationToken cancellationToken = default)
     {
         UpdateSessionState(request);
-        return agent.connection.PromptAsync(request, cancellationToken);
+        return agent.connection.PromptAsync(request, cancellationToken)
+        .Then(UpdateSessionState);
     }
-        
-    public Task<Result<PromptResponse>> PromptAsync(string prompt, CancellationToken cancellationToken = default) =>
-       PromptAsync(new PromptRequest() { SessionId = sessionId, Prompt = { ContentBlock._Text(prompt) } }, cancellationToken);
 
+    public Task<Result<PromptResponse>> PromptAsync(ContentBlock[] prompt, CancellationToken cancellationToken = default) =>
+        PromptAsync(new PromptRequest() { SessionId = sessionId, Prompt = prompt }, cancellationToken);
+
+    public Task<Result<PromptResponse>> PromptAsync(string prompt, CancellationToken cancellationToken = default) =>
+       PromptAsync(new PromptRequest() { SessionId = sessionId, Prompt = [ContentBlock._Text(prompt)] }, cancellationToken);
 
     internal void UpdateSessionState(PromptRequest prompt)
     {
-        updates.Push(prompt);
-        currentTurn = SessionTurn.Agent;
+        turns.Push(prompt);
         Debug("Updating session state with user prompt {0}...", prompt.Message.Truncate(16));
+    }
+
+    internal PromptResponse UpdateSessionState(PromptResponse response)
+    {
+        turns.Push(response);
+        Debug("Updating session state with agent prompt response {0}...", response.Message.Truncate(16));
+        return response;    
     }
 
     internal void UpdateSessionState(SessionUpdate m)
     {        
         if (m is SessionUpdateAgentMessageChunk sx)
         {
-            updates.Push(sx);
+            turns.Push(sx);
             Debug("Updating session state with agent response message {0}...", sx.Content.Message.Truncate(16));
         }
         else if (m is SessionUpdatePlan p)
         {
-            updates.Push(p);
-            currentTurn = SessionTurn.User;
+            turns.Push(p);
         }
         else if (m is SessionUpdateToolCall tc)
         {
-            updates.Push(tc);
+            turns.Push(tc);
         }
         else if (m is SessionUpdateToolCallUpdate tcu)
         {
-            updates.Push(tcu);
-            currentTurn = SessionTurn.User;
+            turns.Push(tcu);
         }
     }
     #endregion
@@ -64,16 +77,7 @@ public class Session : Runtime
     public readonly string sessionId;
     public readonly object agentResponse;
     public string? model;
-    public readonly Stack<ITurn> updates = new Stack<ITurn>();   
-    public SessionTurn currentTurn = SessionTurn.User;
-    #endregion
-
-    #region Types
-    public enum SessionTurn
-    {
-        Agent,
-        User
-    }
+    public readonly Stack<ITurn> turns = new Stack<ITurn>();   
     #endregion
 }
 

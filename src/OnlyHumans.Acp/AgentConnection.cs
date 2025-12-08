@@ -12,6 +12,9 @@ using StreamJsonRpc;
 
 using static Result;
 
+/// <summary>
+/// A connection to an agent over JSON-RPC
+/// </summary>
 public class AgentConnection : Runtime, IDisposable, IAgent, IClientEvents
 {
     #region Constructors

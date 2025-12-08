@@ -2,13 +2,54 @@ namespace OnlyHumans.Acp;
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+
+
+public partial record ClientCapabilities
+{
+    public static ClientCapabilities Default = new ClientCapabilities()
+    {
+        Fs = new FileSystemCapability()
+        {
+            ReadTextFile = true,
+            WriteTextFile = true
+        },
+        Terminal = true,
+    };
+}
+
+public partial record Implementation
+{
+    public static Implementation Default = new Implementation()
+    {
+        Name = null,
+        Version = "1.0",
+        Title = null
+    };
+}
+
+public partial record PromptRequest : ITurn
+{
+    [JsonIgnore]
+    public Role Role { get; } = Role.User;
+
+    [JsonIgnore]
+    public string Message => Prompt.Select(e => e.Message).JoinWith(Environment.NewLine);
+}
+
+public partial record PromptResponse : ITurn
+{
+    [JsonIgnore]
+    public Role Role { get; } = Role.Assistant;
+
+    [JsonIgnore]
+    public string Message => StopReason;
+}
 
 /// <summary>
 /// Text content. May be plain text or formatted with Markdown.
 /// </summary>
-
 public partial record ContentBlockText : ContentBlock
 {
     [JsonProperty("_meta", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
@@ -122,7 +163,24 @@ public partial record BlobResourceContents : EmbeddedResourceResource {}
 [JsonInheritance("audio", typeof(ContentBlockAudio))]
 [JsonInheritance("resource_link", typeof(ContentBlockResourceLink))]
 [JsonInheritance("resource", typeof(ContentBlockResource))]
-public partial record ContentBlock {}
+public partial record ContentBlock {
+    [JsonIgnore]
+    public string Message => this switch
+    {
+        ContentBlockText text => text.Text,
+        ContentBlockImage image => image.Data,
+        ContentBlockAudio audio => audio.Data,
+        ContentBlockResource resource when resource.Resource is TextResourceContents t => t.Text,
+        ContentBlockResource resource when resource.Resource is BlobResourceContents t => t.Blob,
+        ContentBlockResourceLink link => link.Uri,
+        _ => throw new NotImplementedException()
+    };
+
+    public static ContentBlockText _Text(string text) => new() { Text = text };
+
+    public static ContentBlockResource TextResource(string mimeType, string text, Uri uri)
+        => new ContentBlockResource() { Resource = new TextResourceContents() { MimeType = mimeType, Text = text, Uri = uri.ToString() } };
+}
 
 /// <summary>
 /// A chunk of the user's message being streamed.
@@ -143,7 +201,7 @@ public partial record SessionUpdateUserMessageChunk : SessionUpdate
 /// <summary>
 /// A chunk of the agent's response being streamed.
 /// </summary>
-public partial record SessionUpdateAgentMessageChunk : SessionUpdate
+public partial record SessionUpdateAgentMessageChunk : SessionUpdate, ITurn
 {
     [JsonProperty("_meta", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
     public object? _meta { get; set; }
@@ -154,6 +212,12 @@ public partial record SessionUpdateAgentMessageChunk : SessionUpdate
 
     [JsonProperty("sessionUpdate", Required = Required.Always)]        
     public string SessionUpdateType { get; set; } = "agent_message_chunk";
+
+    [JsonIgnore]
+    public Role Role { get; } = Role.Assistant;
+
+    [JsonIgnore]
+    public string Message => Content.Message;
 }
 
 /// <summary>
@@ -175,7 +239,7 @@ public partial record SessionUpdateAgentThoughtChunk : SessionUpdate
 /// <summary>
 /// Notification that a new tool call has been initiated.
 /// </summary>
-public partial record SessionUpdateToolCall : SessionUpdate
+public partial record SessionUpdateToolCall : SessionUpdate, ITurn
 {
     [JsonProperty("_meta", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
     public object? _meta { get; set; }
@@ -208,12 +272,17 @@ public partial record SessionUpdateToolCall : SessionUpdate
     [JsonProperty("toolCallId", Required = Required.Always)]
     [Required(AllowEmptyStrings = true)]
     public string ToolCallId { get; set; } = "";
+
+    [JsonIgnore]
+    public Role Role { get; } = Role.Assistant;
+    [JsonIgnore]
+    public string Message => $"{Kind} {Title}({ToolCallId})";
 }
 
 /// <summary>
 /// Update on the status or results of a tool call.
 /// </summary>
-public partial record SessionUpdateToolCallUpdate : SessionUpdate
+public partial record SessionUpdateToolCallUpdate : SessionUpdate, ITurn
 {
     [JsonProperty("_meta", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
     public object? _meta { get; set; }
@@ -245,12 +314,18 @@ public partial record SessionUpdateToolCallUpdate : SessionUpdate
     [JsonProperty("toolCallId", Required = Required.Always)]
     [Required(AllowEmptyStrings = true)]
     public string ToolCallId { get; set; } = "";
+
+    [JsonIgnore]
+    public Role Role { get; } = Role.Assistant;
+
+    [JsonIgnore]
+    public string Message => $"{Kind} {Title}({ToolCallId}) {Status}";
 }
 
 /// <summary>
 /// The agent's execution plan for complex tasks.
 /// </summary>
-public partial record SessionUpdatePlan : SessionUpdate
+public partial record SessionUpdatePlan : SessionUpdate, ITurn
 {
     [JsonProperty("_meta", Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
     public object? _meta { get; set; }
@@ -261,6 +336,13 @@ public partial record SessionUpdatePlan : SessionUpdate
 
     [JsonProperty("sessionUpdate", Required = Required.Always)]
     public string SessionUpdateType { get; set; } = "plan";
+
+    [JsonIgnore]
+    public Role Role { get; } = Role.Assistant;
+
+    [JsonIgnore]
+    public string Message => Entries.Select(e => e.Content).JoinWith(Environment.NewLine);
+
 }
 
 /// <summary>

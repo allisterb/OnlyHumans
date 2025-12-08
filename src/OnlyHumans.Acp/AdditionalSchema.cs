@@ -163,7 +163,8 @@ public partial record BlobResourceContents : EmbeddedResourceResource {}
 [JsonInheritance("audio", typeof(ContentBlockAudio))]
 [JsonInheritance("resource_link", typeof(ContentBlockResourceLink))]
 [JsonInheritance("resource", typeof(ContentBlockResource))]
-public partial record ContentBlock {
+public partial record ContentBlock 
+{
     [JsonIgnore]
     public string Message => this switch
     {
@@ -388,24 +389,11 @@ public partial record SessionUpdateCurrentModeUpdate : SessionUpdate
 [JsonInheritance("current_mode_update", typeof(SessionUpdateCurrentModeUpdate))]
 public partial record SessionUpdate {}
 
-public enum StopReason
+public record StopReason
 {
-    EndTurn,
-    MaxTokens,
-    MaxTurnRequests,
-    Refusal,
-    Cancellation
-}
-
-public partial record PromptResponse
-{
-    public StopReason StopReasonEnum => StopReason switch
-    {
-        "end_turn" => Acp.StopReason.EndTurn,
-        "max_tokens" => Acp.StopReason.MaxTokens,
-        "max_turn_requests" => Acp.StopReason.MaxTurnRequests,
-        "refusal" => Acp.StopReason.Refusal,
-        "cancellation" => Acp.StopReason.Cancellation,
-        var sr => throw new ArgumentException($"Unknown StopReason {sr}")
-    };
+    public const string EndTurn = "end_turn";
+    public const string MaxTokens = "max_tokens";
+    public const string MaxTurnRequests = "max_turn_requests";
+    public const string Refusal = "refusal";
+    public const string Cancellation = "cancellation";  
 }

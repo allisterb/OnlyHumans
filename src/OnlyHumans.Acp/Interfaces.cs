@@ -50,12 +50,18 @@ public interface IClientEvents
 }
 
 /// <summary>
+/// A message in a conversation between a user and an assistant.
+/// </summary>
+public interface IMessage
+{
+    string Message { get; }
+}
+/// <summary>
 /// A turn of a conversation between a user and an assistant.
 /// </summary>
-public interface ITurn
+public interface ITurn : IMessage
 {
-    Role Role { get; }  
-    string Message { get; }
+    Role Role { get; }      
 }
 
 public class AgentNotInitializedException : InvalidOperationException

@@ -48,10 +48,23 @@ public static class TaskExtensions
             return r;
         });
 
+    public static Task<Result<T>> After<T>(this Task<Result<T>> resultTask, Action action)
+    {
+        try
+        {
+            action();
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult(Result<T>.Failure("An error occurred in the After action.", ex));
+        }
+        return resultTask;
+    }
+
     public static Task<bool> IsSuccess<T>(this Task<Result<T>> resultTask) =>
         resultTask.ContinueWith(t => t.IsCompletedSuccessfully && t.Result.IsSuccess);
 
-    public static Task<T> Succeeded<T>(this Task<Result<T>> resultTask) =>
+    public static Task<T> Success<T>(this Task<Result<T>> resultTask) =>
        resultTask.ContinueWith(t =>
        {
            if (t.IsCompletedSuccessfully)
@@ -64,7 +77,7 @@ public static class TaskExtensions
                {
                    throw t.Result.Exception;
                }
-               else throw new InvalidOperationException();
+               else throw new InvalidOperationException("The operation did not succeed.");
            }
            else if (t.Exception is not null)
            {
@@ -72,7 +85,7 @@ public static class TaskExtensions
            }
            else
            {
-               throw new InvalidOperationException();
+               throw new InvalidOperationException("The operation did not succeed or was cancelled.");
            }
        });
 }

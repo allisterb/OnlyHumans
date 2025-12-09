@@ -32,10 +32,10 @@ public partial record Implementation
 public partial record PromptRequest : ITurn
 {
     [JsonIgnore]
-    public Stack<SessionUpdate> responses = new Stack<SessionUpdate>();
+    public List<SessionUpdate>? responseUpdates;
 
     [JsonIgnore]
-    public PromptResponse? EndTurn { get; set; }
+    public PromptResponse? Response { get; set; }
 
     [JsonIgnore]
     public Role Role { get; } = Role.User;
@@ -51,6 +51,9 @@ public partial record PromptResponse : ITurn
 
     [JsonIgnore]
     public string Message => StopReason;
+
+    [JsonIgnore]
+    public List<SessionUpdate> updates = new List<SessionUpdate>();
 }
 
 /// <summary>

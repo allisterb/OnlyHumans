@@ -57,4 +57,6 @@ public static class CollectionExtensions
     }   
 
     public static T LastItem<T>(this List<T> list) => list.Count > 0 ? list[list.Count - 1] : throw new InvalidOperationException("This list is empty.");
+
+    public static bool IsNotEmpty<T>(this List<T> list) => list.Count > 0;
 }

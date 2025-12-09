@@ -31,7 +31,7 @@ public class ClientTests : TestsRuntime
         using var client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, clientName: "TestClient")
             .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());       
         Assert.True(await client.InitializeAsync().IsSuccess());
-        var session = await client.NewSessionAsync(agentCmdWd).Succeeded();
+        var session = await client.NewSessionAsync(agentCmdWd).Success();
         var pr = await session.PromptAsync("hello");
         Assert.True(pr.IsSuccess);
         pr = await session.PromptAsync("What is your name?");

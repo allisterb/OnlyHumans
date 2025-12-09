@@ -10,21 +10,21 @@ public class SessionTests : TestsRuntime
     {
         client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd)
             .WithVerboseConsoleConnectionTracing();
-        client.InitializeAsync().Succeeded().Wait();
+        client.InitializeAsync().Success().Wait();
     }
     
     [Fact]
     public async Task CanPrompt()
     {
-        var sess = await client.NewSessionAsync(agentCmdWd).Succeeded();
+        var sess = await client.NewSessionAsync(agentCmdWd).Success();
         Assert.True(sess.CurrentTurn == Role.User);
-        var ar = await sess.PromptAsync("Hello").Succeeded();
-        var br = await sess.PromptAsync([
+        var ar = await sess.PromptAsync("Hello").Success();
+        var pr = await sess.PromptAsync([
             ContentBlock._Text("Can you analyze this code for potential issues?"),
             ContentBlock.TextResource("text/x-python", "def process_data(items):\n    for item in items:\n        print(item)", new Uri("file:///home/user/project/main.py")) 
-        ]);
-        Assert.True(br.IsSuccess);
-
+        ]).Success();
+        Assert.True(sess.CurrentTurn == Role.User);       
+        Assert.NotEmpty(pr.updates);
     }
     
     static Client client;

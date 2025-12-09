@@ -27,7 +27,7 @@ public interface IAgent
     // Extension method for custom RPC calls
     Task<Result<Dictionary<string, object>>> ExtMethodAsync(string method, Dictionary<string, object>? parameters = null, CancellationToken cancellationToken = default);
     // Extension notification for custom notifications
-    Task<Result<None>> ExtNotificationAsync(string notification, Dictionary<string, object>? parameters = null);   
+    Task ExtNotificationAsync(string notification, Dictionary<string, object>? parameters = null);   
 }
 
 /// <summary>

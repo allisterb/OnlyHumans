@@ -9,7 +9,7 @@ public class SessionTests : TestsRuntime
     static SessionTests()
     {
         client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd)
-            .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener()); ;
+            .WithVerboseConsoleConnectionTracing();
         client.InitializeAsync().Succeeded().Wait();
     }
     
@@ -17,7 +17,7 @@ public class SessionTests : TestsRuntime
     public async Task CanPrompt()
     {
         var sess = await client.NewSessionAsync(agentCmdWd).Succeeded();
-        Assert.True(sess.CurrentTurnRole == Role.User);
+        Assert.True(sess.CurrentTurn == Role.User);
         var ar = await sess.PromptAsync("Hello").Succeeded();
         var br = await sess.PromptAsync([
             ContentBlock._Text("Can you analyze this code for potential issues?"),

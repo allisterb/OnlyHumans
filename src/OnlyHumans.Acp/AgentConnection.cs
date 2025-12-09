@@ -72,7 +72,9 @@ public class AgentConnection : Runtime, IDisposable, IAgent, IClientEvents
             ostream = omonitoringStream;                        
         }
         agentRpcEvents = new RpcEvents(this);
-        jsonrpc = new JsonRpc(new JsonRpcMessageHandler(ostream, istream, new JsonMessageFormatter(), JsonRpcMessageHandler.DelimiterType.NewLine, false));
+        // Use for debugging:
+        // jsonrpc = new JsonRpc(new JsonRpcMessageHandler(ostream, istream, new JsonMessageFormatter(), JsonRpcMessageHandler.DelimiterType.NewLine, false));
+        jsonrpc = new JsonRpc(new NewLineDelimitedMessageHandler(ostream, istream, new JsonMessageFormatter()));
         jsonrpc.TraceSource.Switch.Level = traceLevel;    
         if (traceListener != null) jsonrpc.TraceSource.Listeners.Add(traceListener);
         jsonrpc.AddLocalRpcTarget(agentRpcEvents, new JsonRpcTargetOptions() { UseSingleObjectParameterDeserialization = true });             
@@ -105,12 +107,12 @@ public class AgentConnection : Runtime, IDisposable, IAgent, IClientEvents
         => ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<SetSessionModelResponse>("session/set_model", request, cancellationToken));
 
     public Task CancelNotificationAsync(CancelNotification notification)
-        => jsonrpc.NotifyAsync("session/cancel", notification);
+        => ExecuteAsync(jsonrpc.NotifyAsync("session/cancel", notification));
 
     public Task<Result<Dictionary<string, object>>> ExtMethodAsync(string method, Dictionary<string, object>? parameters = null, CancellationToken cancellationToken = default)
         => ExecuteAsync(jsonrpc.InvokeWithParameterObjectAsync<Dictionary<string, object>>(method, parameters, cancellationToken));
 
-    public Task<Result<None>> ExtNotificationAsync(string notification, Dictionary<string, object>? parameters = null)
+    public Task ExtNotificationAsync(string notification, Dictionary<string, object>? parameters = null)
         => ExecuteAsync(jsonrpc.NotifyAsync(notification, parameters));
     #endregion
 

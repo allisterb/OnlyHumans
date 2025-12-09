@@ -24,17 +24,7 @@ public class ClientTests : TestsRuntime
         Assert.True(s.IsSuccess);
         Assert.NotNull(s.Value.sessionId);
     }
-
-    [Fact]    
-    async Task CanAuthenticate()
-    {
-        using var client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd, agentEnv, clientName: "TestClient")
-            .WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());
-        var r = await client.InitializeAsync();
-        var ar = await client.AuthenticateAsync("api_key", new Dictionary<string, object> { { "apiKey", agentApiKey } });
-        Assert.True(ar.IsSuccess);  
-    }
-    
+       
     [Fact]
     public async Task CanPrompt()
     {

@@ -73,6 +73,8 @@ public class Client : Runtime, IDisposable
         return this;
     }
 
+    public Client WithVerboseConsoleConnectionTracing() => WithConnectionTracing(SourceLevels.Verbose, new ConsoleTraceListener());
+    
     public void Dispose()
     {
         connection.Dispose();

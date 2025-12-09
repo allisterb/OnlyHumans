@@ -32,6 +32,12 @@ public partial record Implementation
 public partial record PromptRequest : ITurn
 {
     [JsonIgnore]
+    public Stack<SessionUpdate> responses = new Stack<SessionUpdate>();
+
+    [JsonIgnore]
+    public PromptResponse? EndTurn { get; set; }
+
+    [JsonIgnore]
     public Role Role { get; } = Role.User;
 
     [JsonIgnore]
@@ -377,7 +383,6 @@ public partial record SessionUpdateCurrentModeUpdate : SessionUpdate
     [JsonProperty("sessionUpdate", Required = Required.Always)]        
     public string SessionUpdateType { get; set; } = "current_mode_update";
 }
-
 
 [JsonInheritance("user_message_chunk", typeof(SessionUpdateUserMessageChunk))]
 [JsonInheritance("agent_message_chunk", typeof(SessionUpdateAgentMessageChunk))]

@@ -15,9 +15,9 @@ public class Session : Runtime
     #endregion
 
     #region Properties
-    public Role CurrentTurnRole => (turns.PeekIfNotEmpty() is null or PromptResponse) ? Role.User : Role.Assistant;
+    public Role CurrentTurn => (turns.PeekIfNotEmpty() is null or PromptResponse) ? Role.User : Role.Assistant;
 
-    public bool CurrentTurnIsTool => CurrentTurnRole == Role.Assistant && turns.Peek() is SessionUpdateToolCall or SessionUpdateToolCallUpdate;
+    public bool CurrentTurnIsTool => CurrentTurn == Role.Assistant && turns.Peek() is SessionUpdateToolCall or SessionUpdateToolCallUpdate;
     #endregion
 
     #region Methods
@@ -39,35 +39,37 @@ public class Session : Runtime
 
     internal void UpdateSessionState(PromptRequest prompt)
     {
-        turns.Push(prompt);
+        prompts.Add(prompt);
+        turns.Push(prompt);     
         Debug("Updating session state with user prompt {0}...", prompt.Message.Truncate(16));
     }
 
     internal PromptResponse UpdateSessionState(PromptResponse response)
     {
         turns.Push(response);
+        if (response.StopReason == StopReason.EndTurn) prompts.LastItem().EndTurn = response;
         Debug("Updating session state with agent prompt response {0}...", response.Message.Truncate(16));
         return response;    
     }
 
     internal void UpdateSessionState(SessionUpdate m)
-    {        
+    {
+        prompts.LastItem().responses.Push(m);
         if (m is SessionUpdateAgentMessageChunk sx)
-        {
-            turns.Push(sx);
-            Debug("Updating session state with agent response message {0}...", sx.Content.Message.Truncate(16));
+        {            
+            Debug("Updating session state with agent message {0}...", sx.Content.Message.Truncate(16));
         }
         else if (m is SessionUpdatePlan p)
         {
-            turns.Push(p);
+            Debug("Updating session state with agent plan {0}...", p.Message.Truncate(16));
         }
         else if (m is SessionUpdateToolCall tc)
         {
-            turns.Push(tc);
+            Debug("Updating session state with agent tool call {0}...", tc.Message.Truncate(16));
         }
         else if (m is SessionUpdateToolCallUpdate tcu)
         {
-            turns.Push(tcu);
+            Debug("Updating session state with agent tool call update {0}...", tcu.Message.Truncate(16));
         }
     }
     #endregion
@@ -77,7 +79,8 @@ public class Session : Runtime
     public readonly string sessionId;
     public readonly object agentResponse;
     public string? model;
-    public readonly Stack<ITurn> turns = new Stack<ITurn>();   
+    public readonly Stack<ITurn> turns = new Stack<ITurn>();
+    protected readonly List<PromptRequest> prompts = new List<PromptRequest>();
     #endregion
 }
 

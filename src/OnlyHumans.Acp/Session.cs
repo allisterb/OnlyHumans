@@ -32,7 +32,7 @@ public class Session : Runtime
         PromptAsync(new PromptRequest() { SessionId = sessionId, Prompt = prompt }, cancellationToken);
 
     public Task<Result<PromptResponse>> PromptAsync(string prompt, CancellationToken cancellationToken = default) =>
-       PromptAsync(new PromptRequest() { SessionId = sessionId, Prompt = [ContentBlock._Text(prompt)] }, cancellationToken);
+       PromptAsync(new PromptRequest() { SessionId = sessionId, Prompt = [ContentBlock.TextPrompt(prompt)] }, cancellationToken);
 
     internal void UpdateSessionState(PromptRequest prompt)
     {

@@ -186,7 +186,7 @@ public partial record ContentBlock
         _ => throw new NotImplementedException()
     };
 
-    public static ContentBlockText _Text(string text) => new() { Text = text };
+    public static ContentBlockText TextPrompt(string text) => new() { Text = text };
 
     public static ContentBlockResource TextResource(string mimeType, string text, Uri uri)
         => new ContentBlockResource() { Resource = new TextResourceContents() { MimeType = mimeType, Text = text, Uri = uri.ToString() } };

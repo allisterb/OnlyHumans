@@ -18,7 +18,7 @@ public class Client : Runtime, IDisposable
         this.AgentName = agentName;
 
         this.connection.SessionUpdateAsync += UpdateSessionState;
-        this.connection.RequestPermissionAsync += (req) => this.RequestPermissionAsync?.Invoke(req) ?? NotImplementedAsync<RequestPermissionResponse>();
+        this.connection.RequestPermissionAsync += RequestPermission;
         this.connection.CreateTerminalAsync += (req) => this.CreateTerminalAsync?.Invoke(req) ?? NotImplementedAsync<CreateTerminalResponse>();
         this.connection.KillTerminalCommandAsync += (req) => this.KillTerminalCommandAsync?.Invoke(req) ?? NotImplementedAsync<KillTerminalCommandResponse>();
         this.connection.ReleaseTerminalAsync += (req) => this.ReleaseTerminalAsync?.Invoke(req) ?? NotImplementedAsync<ReleaseTerminalResponse>();
@@ -91,6 +91,11 @@ public class Client : Runtime, IDisposable
         var session = sessions[notification.SessionId];
         session.UpdateSessionState(notification.Update);
         return SessionUpdateAsync?.Invoke(notification) ?? Task.CompletedTask;
+    }
+
+    protected Task<RequestPermissionResponse> RequestPermission(RequestPermissionRequest request)
+    {
+        throw new NotImplementedException();
     }
     #endregion
 

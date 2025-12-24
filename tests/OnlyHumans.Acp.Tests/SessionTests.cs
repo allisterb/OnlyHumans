@@ -9,7 +9,7 @@ public class SessionTests : TestsRuntime
     static SessionTests()
     {
         client = new Client(agentCmdPath, agentCmdArgs, agentCmdWd, clientTitle: "TestClient")
-            .WithVerboseConsoleConnectionTracing();
+                    .WithVerboseConsoleConnectionTracing();
         client.InitializeAsync().Success().Wait();
     }
     
@@ -19,7 +19,7 @@ public class SessionTests : TestsRuntime
         var sess = await client.NewSessionAsync(agentCmdWd).Success();
         Assert.True(sess.CurrentTurn == Role.User);
         var pr = await sess.PromptAsync([
-            ContentBlock._Text("Can you analyze this code for potential issues?"),
+            ContentBlock.TextPrompt("Can you analyze this code for potential issues?"),
             ContentBlock.TextResource("text/x-python", "def process_data(items):\n    for item in items:\n        print(item)", new Uri("file:///home/user/project/main.py")) 
         ]).Success();
         Assert.True(sess.CurrentTurn == Role.User);       

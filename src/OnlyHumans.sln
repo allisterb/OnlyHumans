@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlyHumans.Acp.Tests", "..\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlyHumans.Understanding", "OnlyHumans.Understanding\OnlyHumans.Understanding.csproj", "{409339C8-EE3D-43D7-99C3-AF4E27EF2F05}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{032FE94F-4E7A-4885-A9CD-466057C67CB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{032FE94F-4E7A-4885-A9CD-466057C67CB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{032FE94F-4E7A-4885-A9CD-466057C67CB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{409339C8-EE3D-43D7-99C3-AF4E27EF2F05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{409339C8-EE3D-43D7-99C3-AF4E27EF2F05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{409339C8-EE3D-43D7-99C3-AF4E27EF2F05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{409339C8-EE3D-43D7-99C3-AF4E27EF2F05}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

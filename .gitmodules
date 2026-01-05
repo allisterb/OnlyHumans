@@ -1,0 +1,3 @@
+[submodule "ext/Jumbee.Console"]
+	path = ext/Jumbee.Console
+	url = https://github.com/allisterb/Jumbee.Console.git

@@ -17,6 +17,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlyHumans.Automation", "On
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlyHumans.Automation.Console", "OnlyHumans.Automation.Console\OnlyHumans.Automation.Console.csproj", "{5541E63B-983D-4628-85F7-144B694303E8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{8B0C4C31-6AAD-418A-868E-CE0536AFE841}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jumbee.Console", "..\ext\Jumbee.Console\src\Jumbee.Console\Jumbee.Console.csproj", "{6FB78B1D-59A0-CA48-D01A-04BF224C1FC9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleGUI", "..\ext\Jumbee.Console\ext\C-sharp-console-gui-framework\ConsoleGUI\ConsoleGUI.csproj", "{341EDB22-7450-5529-1C19-D07EDF6360EE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spectre.Console", "..\ext\Jumbee.Console\ext\spectre.console\src\Spectre.Console\Spectre.Console.csproj", "{DCDFB1CB-4777-ECC7-D69C-79DB9EFF1C8E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Jumbee.Console", "Jumbee.Console", "{B3B51EEB-00C8-4BD3-99C1-A45025573399}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,12 +57,28 @@ Global
 		{5541E63B-983D-4628-85F7-144B694303E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5541E63B-983D-4628-85F7-144B694303E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5541E63B-983D-4628-85F7-144B694303E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FB78B1D-59A0-CA48-D01A-04BF224C1FC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FB78B1D-59A0-CA48-D01A-04BF224C1FC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FB78B1D-59A0-CA48-D01A-04BF224C1FC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FB78B1D-59A0-CA48-D01A-04BF224C1FC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{341EDB22-7450-5529-1C19-D07EDF6360EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{341EDB22-7450-5529-1C19-D07EDF6360EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{341EDB22-7450-5529-1C19-D07EDF6360EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{341EDB22-7450-5529-1C19-D07EDF6360EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCDFB1CB-4777-ECC7-D69C-79DB9EFF1C8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCDFB1CB-4777-ECC7-D69C-79DB9EFF1C8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCDFB1CB-4777-ECC7-D69C-79DB9EFF1C8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCDFB1CB-4777-ECC7-D69C-79DB9EFF1C8E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{032FE94F-4E7A-4885-A9CD-466057C67CB8} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{6FB78B1D-59A0-CA48-D01A-04BF224C1FC9} = {B3B51EEB-00C8-4BD3-99C1-A45025573399}
+		{341EDB22-7450-5529-1C19-D07EDF6360EE} = {B3B51EEB-00C8-4BD3-99C1-A45025573399}
+		{DCDFB1CB-4777-ECC7-D69C-79DB9EFF1C8E} = {B3B51EEB-00C8-4BD3-99C1-A45025573399}
+		{B3B51EEB-00C8-4BD3-99C1-A45025573399} = {8B0C4C31-6AAD-418A-868E-CE0536AFE841}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2FDF94FF-73B5-4BDF-AB3C-30A7FA9AC990}

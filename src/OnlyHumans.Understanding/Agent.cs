@@ -1,5 +1,10 @@
 ﻿namespace OnlyHumans;
 
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
@@ -9,11 +14,9 @@ using Microsoft.SemanticKernel.Functions;
 
 public class AgentConversation : ModelConversation
 {
-    public AgentConversation(string instructions, string name = "Default Agent", string[]? systemPrompts = null, (IPlugin, string)[]? plugins = null, 
-        Dictionary<string, Dictionary<string, object>>? sharedState = null, bool immutableKernel = false, 
-        ModelRuntime modelRuntime = ModelRuntime.Ollama, string model = OllamaModels.Gemma3n_e4b_tools_test, string embeddingModel = OllamaModels.Nomic_Embed_Text, string endpointUrl = "http://localhost:11434",
-                ILoggerFactory? loggerFactory = null)
-                : base(modelRuntime, model, embeddingModel, endpointUrl, systemPrompts)
+    public AgentConversation(Model model, Model embeddingModel, string instructions, string name = "Default Agent", string[]? systemPrompts = null, (IPlugin, string)[]? plugins = null, 
+        Dictionary<string, Dictionary<string, object>>? sharedState = null, bool immutableKernel = false,  ILoggerFactory? loggerFactory = null)
+                : base(model, embeddingModel, systemPrompts)
     {
         agent = new ChatCompletionAgent()
         {

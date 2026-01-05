@@ -1,5 +1,11 @@
 ﻿namespace OnlyHumans;
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,47 +16,45 @@ using Microsoft.KernelMemory;
 using Microsoft.KernelMemory.AI;
 using Microsoft.KernelMemory.AI.Ollama;
 using Microsoft.KernelMemory.AI.OpenAI;
-
 using Microsoft.KernelMemory.SemanticKernelPlugin.Internals;
 
 using static Result;
 
 public class Memory : Runtime
 {
-    public Memory(ModelRuntime modelRuntime, string textmodel, string embeddingmodel, string endpointUrl = "http://localhost:11434")
+    public Memory(Model textmodel, Model embeddingmodel)
     {
-        this.modelRuntime = modelRuntime;
+        this.model = textmodel;
         var builder = new KernelMemoryBuilder();
         builder.Services.AddLogging(configure =>
             configure
             .AddProvider(loggerProvider)
             .SetMinimumLevel(LogLevel.Trace));
 
-        if (modelRuntime == ModelRuntime.Ollama)
+        if (model.Runtime == ModelRuntime.Ollama)
         { 
             var ollamaconfig = new OllamaConfig()
             {
-                Endpoint = endpointUrl,
-                TextModel = new OllamaModelConfig(textmodel, 32 * 1024),
-                EmbeddingModel = new OllamaModelConfig(embeddingmodel, 2048)
-            };
-        
-        this.memory =
-            builder
-            .WithOllamaTextGeneration(ollamaconfig, new CL100KTokenizer())
-            .WithOllamaTextEmbeddingGeneration(ollamaconfig, new CL100KTokenizer())
-            .Build<MemoryServerless>();
+                Endpoint = model.PathorUrl,
+                TextModel = new OllamaModelConfig(model.Name, 32 * 1024),
+                EmbeddingModel = new OllamaModelConfig(embeddingmodel.Name, 2048)
+            };        
+            this.memory =
+                builder
+                .WithOllamaTextGeneration(ollamaconfig, new CL100KTokenizer())
+                .WithOllamaTextEmbeddingGeneration(ollamaconfig, new CL100KTokenizer())
+                .Build<MemoryServerless>();
         }
-        else if (modelRuntime == ModelRuntime.OpenAI)
+        else if (model.Runtime == ModelRuntime.OpenAI)
         {
             var apiKey = config?["Model:ApiKey"] ?? throw new InvalidOperationException(); 
-            OpenAIConfig oac = new () { APIKey = apiKey, Endpoint = endpointUrl, TextModel = textmodel, EmbeddingModel = embeddingmodel };
+            OpenAIConfig oac = new () { APIKey = apiKey, Endpoint = model.Name, TextModel = textmodel.Name, EmbeddingModel = embeddingmodel.Name };
             this.memory = builder
                 .WithOpenAITextGeneration(oac, new CL100KTokenizer())
                 .WithOpenAITextEmbeddingGeneration(oac, new CL100KTokenizer())
                 .Build<MemoryServerless>();
         }
-        else throw new NotSupportedException($"Model runtime {modelRuntime} is not supported as yet.");
+        else throw new NotSupportedException($"Model runtime {model.Runtime} is not supported as yet.");
 
         this.plugin = new MemoryPlugin(this, waitForIngestionToComplete: false, defaultIndex: "kb");
     }
@@ -60,7 +64,8 @@ public class Memory : Runtime
         kbindex.Clear();
         foreach (var file in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
         {
-            var text = await Documents.GetDocumentText(file);
+            //var text = await Documents.GetDocumentText(file);
+            var text = File.ReadAllText(file);
             if (!string.IsNullOrEmpty(text))
             {
                 var id = file.GetHashCode();
@@ -133,7 +138,7 @@ public class Memory : Runtime
     #region Fields
     public readonly MemoryPlugin plugin;
     Dictionary<int, string> kbindex = new Dictionary<int, string>();
-    readonly ModelRuntime modelRuntime;
+    readonly Model model;
     internal IKernelMemory memory;
     
     #endregion

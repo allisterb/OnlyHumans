@@ -1,10 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+﻿// Based on: https://github.com/microsoft/semantic-kernel/tree/main/dotnet/samples/Concepts/ChatCompletion/ChatHistoryReducers/ChatHistoryExtensions.cs
+// Copyright (c) Microsoft. All rights reserved.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using Microsoft.ML.Tokenizers;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 
-namespace ChatCompletion;
+namespace OnlyHumans.ChatCompletion;
 
 /// <summary>
 /// Extension methods for <see cref="ChatHistory"/>."/>

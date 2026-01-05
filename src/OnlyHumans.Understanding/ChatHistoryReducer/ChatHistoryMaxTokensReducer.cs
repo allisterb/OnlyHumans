@@ -1,9 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+﻿// Based on: https://github.com/microsoft/semantic-kernel/tree/main/dotnet/samples/Concepts/ChatCompletion/ChatHistoryReducers/CjatHistoryMaxTokensReducer.cs
+// Copyright (c) Microsoft. All rights reserved.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 
-namespace ChatCompletion;
+namespace OnlyHumans.ChatCompletion;
 
 /// <summary>
 /// Implementation of <see cref="IChatHistoryReducer"/> which trim to the specified max token count.

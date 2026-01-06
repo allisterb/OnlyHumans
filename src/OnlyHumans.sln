@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spectre.Console", "..\ext\J
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Jumbee.Console", "Jumbee.Console", "{B3B51EEB-00C8-4BD3-99C1-A45025573399}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlyHumans.Understanding.Tests", "..\tests\OnlyHumans.Understanding.Tests\OnlyHumans.Understanding.Tests.csproj", "{D5056712-41B2-13A0-6497-5C66A28C70EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{DCDFB1CB-4777-ECC7-D69C-79DB9EFF1C8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCDFB1CB-4777-ECC7-D69C-79DB9EFF1C8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCDFB1CB-4777-ECC7-D69C-79DB9EFF1C8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5056712-41B2-13A0-6497-5C66A28C70EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5056712-41B2-13A0-6497-5C66A28C70EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5056712-41B2-13A0-6497-5C66A28C70EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5056712-41B2-13A0-6497-5C66A28C70EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -79,6 +85,7 @@ Global
 		{341EDB22-7450-5529-1C19-D07EDF6360EE} = {B3B51EEB-00C8-4BD3-99C1-A45025573399}
 		{DCDFB1CB-4777-ECC7-D69C-79DB9EFF1C8E} = {B3B51EEB-00C8-4BD3-99C1-A45025573399}
 		{B3B51EEB-00C8-4BD3-99C1-A45025573399} = {8B0C4C31-6AAD-418A-868E-CE0536AFE841}
+		{D5056712-41B2-13A0-6497-5C66A28C70EF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2FDF94FF-73B5-4BDF-AB3C-30A7FA9AC990}

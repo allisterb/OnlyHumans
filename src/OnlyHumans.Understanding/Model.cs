@@ -1,28 +1,28 @@
 ﻿namespace OnlyHumans;
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
+using LLama;
+using LLama.Native;
+using LLamaSharp.SemanticKernel;
+using LLamaSharp.SemanticKernel.ChatCompletion;
+using LLamaSharp.SemanticKernel.TextEmbedding;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.VectorData;
+using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.InMemory;
 using Microsoft.SemanticKernel.Connectors.Ollama;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Embeddings;
-using OpenAI.Chat;
 using OllamaSharp;
-using LLama.Native;
-using LLamaSharp.SemanticKernel;
-using LLamaSharp.SemanticKernel.ChatCompletion;
-using LLamaSharp.SemanticKernel.TextEmbedding;
-
 using OnlyHumans.ChatCompletion;
+using OpenAI.Chat;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 public enum ModelRuntime
 {
@@ -60,10 +60,9 @@ public class ModelConversation : Runtime
                 .AddProvider(loggerProvider)
             );
         if (model.Runtime == ModelRuntime.Ollama)
-        {
-            var endpoint = new Uri(this.model.PathorUrl);
+        {            
 #pragma warning disable SKEXP0001, SKEXP0070 
-            var _client = new OllamaApiClient(endpoint, model.Name);            
+            var _client = new OllamaApiClient(new Uri(this.model.PathorUrl), model.Name);            
             if (!_client.IsRunningAsync().Result)
             {
                 throw new InvalidOperationException($"Ollama API at {this.model.PathorUrl} is not running. Please start the Ollama server.");
@@ -71,7 +70,7 @@ public class ModelConversation : Runtime
             client = _client;
             chat = _client.AsChatCompletionService(kernel.Services)
                 .UsingChatHistoryReducer(new ChatHistoryTruncationReducer(chatHistoryMaxLength));
-            builder.AddOllamaEmbeddingGenerator(new OllamaApiClient(model.PathorUrl, embeddingModel.Name)); 
+            builder.AddOllamaEmbeddingGenerator(new OllamaApiClient(new Uri(this.embeddingModel.PathorUrl), this.embeddingModel.Name)); 
 #pragma warning restore SKEXP0070, SKEXP0001 
             promptExecutionSettings = new OllamaPromptExecutionSettings()
             {
@@ -91,13 +90,11 @@ public class ModelConversation : Runtime
                 .WithAutoFallback(true)
                 .WithCuda(true)
                 .WithSearchDirectory(this.model.PathorUrl)
-                .WithLogCallback(logger);
-
-            var parameters = new LLama.Common.ModelParams(model.Name)
+                .WithLogCallback(logger);            
+            var parameters = new LLama.Common.ModelParams(model.PathorUrl)
             {
-                FlashAttention = true,
+                FlashAttention = true,           
             };
-
             LLama.LLamaWeights lm = LLama.LLamaWeights.LoadFromFile(parameters);
             var ex = new LLama.StatelessExecutor(lm, parameters, logger);
             promptExecutionSettings = new LLamaSharpPromptExecutionSettings()
@@ -109,7 +106,14 @@ public class ModelConversation : Runtime
             chat = new LLamaSharpChatCompletion(ex).UsingChatHistoryReducer(new ChatHistoryTruncationReducer(chatHistoryMaxLength));
 #pragma warning disable SKEXP0001,SKEXP0010 
             client = chat.AsChatClient();
-            Info("Using llama.cpp embedded library at {0} with model {1}", this.model.PathorUrl, model);
+            var embeddingParameters = new LLama.Common.ModelParams(embeddingModel.PathorUrl)
+            {
+                
+            };
+            var elm = LLamaWeights.LoadFromFile(embeddingParameters);
+            var embedding = new LLamaEmbedder(elm, embeddingParameters);
+            builder.Services.AddEmbeddingGenerator(embedding);
+            Info("Using llama.cpp embedded library with model {0} at {1}.", this.model.Name, this,model.PathorUrl);
         }
         else
         {
@@ -134,7 +138,7 @@ public class ModelConversation : Runtime
             Info("Using OpenAI compatible API at {0} with model {1}", this.model.PathorUrl, model);
         }
         
-        builder.Services
+        builder.Services            
             .AddChatClient(client)
             .UseFunctionInvocation(loggerFactory);
         kernel = builder.Build();

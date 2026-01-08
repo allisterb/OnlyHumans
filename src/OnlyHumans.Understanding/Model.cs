@@ -108,7 +108,7 @@ public class ModelConversation : Runtime
             chat = new LLamaSharpChatCompletion(ex).UsingChatHistoryReducer(new ChatHistoryTruncationReducer(chatHistoryMaxLength));
 #pragma warning disable SKEXP0001,SKEXP0010 
             client = chat.AsChatClient();
-            var embeddingParameters = this.embeddingModel.ModelParamsorConfig is not null ? (LLama.Common.ModelParams) this.embeddingModel.ModelParamsorConfig : new LLama.Common.ModelParams(embeddingModel.PathorUrl);
+            var embeddingParameters = this.embeddingModel.ModelParamsorConfig is not null ? (LLama.Common.ModelParams) this.embeddingModel.ModelParamsorConfig : new LLama.Common.ModelParams(this.embeddingModel.PathorUrl);
             embeddingParameters.ModelPath = this.embeddingModel.PathorUrl;   
             var elm = LLamaWeights.LoadFromFile(embeddingParameters);
             var embedding = new LLamaEmbedder(elm, embeddingParameters);

@@ -1,13 +1,17 @@
 ﻿namespace OnlyHumans.Understanding.Tests;
 
-using OnlyHumans.Understanding;
 public class ModelTests : TestsRuntime
 {
     [Fact]
     public async Task CanLoadLlamaSharpModel()
     {
-        var mc = new ModelConversation(functionGemmaQ8Model1);
+        var mc = new ModelConversation(functionGemmaQ8Model);
         Assert.NotNull(mc);
+        var m = mc.Prompt("Hello who are you?");
+        await foreach(var message in m)
+        {
+            Console.WriteLine(message);
+        }
 
     }
 }

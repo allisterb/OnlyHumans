@@ -8,9 +8,9 @@ public class TestsRuntime : OnlyHumans.TestsRuntime
     {
         Initialize("OnlyHumans", "Tests", true);
         functionGemmaQ8ModelPath = config.GetRequiredValue("FunctionGemmaQ8ModelPath");
-        functionGemmaQ8Model1 = new Model(ModelRuntime.LlamaCpp, "function-gemma-q8", functionGemmaQ8ModelPath);
+        functionGemmaQ8Model = new Model(ModelRuntime.LlamaCpp, "function-gemma-q8", functionGemmaQ8ModelPath);
     }
     static protected readonly string functionGemmaQ8ModelPath;
-    static protected readonly Model functionGemmaQ8Model1; 
+    static protected readonly Model functionGemmaQ8Model; 
 }
 

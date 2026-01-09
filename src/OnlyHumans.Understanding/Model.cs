@@ -2,9 +2,9 @@
 
 using LLama;
 using LLama.Native;
+using LLama.Transformers;
 using LLamaSharp.SemanticKernel;
 using LLamaSharp.SemanticKernel.ChatCompletion;
-using LLamaSharp.SemanticKernel.TextEmbedding;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +19,6 @@ using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Embeddings;
 using OllamaSharp;
 using OnlyHumans.ChatCompletion;
-using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -51,6 +50,13 @@ public record Model
 public class ModelConversation : Runtime
 {
     #region Constructors
+    static ModelConversation()
+    {
+        NativeLibraryConfig.LLama
+     .WithLogCallback(logger)
+     .WithCuda(false)
+     .WithAutoFallback(true);
+    }
     public ModelConversation(Model model, Model? embeddingModel = null, string[]? systemPrompts = null, (IPlugin, string)[]? plugins = null)
     {        
         this.model = model;    
@@ -71,7 +77,8 @@ public class ModelConversation : Runtime
                 throw new InvalidOperationException($"Ollama API at {this.model.PathorUrl} is not running. Please start the Ollama server.");
             }
             client = _client;
-            chat = _client.AsChatCompletionService(kernel.Services)
+            chat = _client
+                .AsChatCompletionService(kernel.Services)
                 .UsingChatHistoryReducer(new ChatHistoryTruncationReducer(chatHistoryMaxLength));
             builder.AddOllamaEmbeddingGenerator(new OllamaApiClient(new Uri(this.embeddingModel.PathorUrl), this.embeddingModel.Name)); 
 #pragma warning restore SKEXP0070, SKEXP0001 
@@ -89,31 +96,36 @@ public class ModelConversation : Runtime
         }
         else if (model.Runtime == ModelRuntime.LlamaCpp)
         {
-            NativeLibraryConfig.LLama
-                .WithLogCallback(logger)
-                .WithCuda(false)
-                .WithAutoFallback(true);            
-            var parameters = model.ModelParamsorConfig is not null ? (LLama.Common.ModelParams)model.ModelParamsorConfig : new LLama.Common.ModelParams(model.PathorUrl)
-            {
-                
-            };
+        
+            var parameters = model.ModelParamsorConfig is not null ? 
+                (LLama.Common.ModelParams)model.ModelParamsorConfig : new LLama.Common.ModelParams(model.PathorUrl);
+            parameters.ModelPath = model.PathorUrl;
             LLamaWeights lm = LLamaWeights.LoadFromFile(parameters);
+            var context = new LLamaContext(lm, parameters, logger);
             var ex = new StatelessExecutor(lm, parameters, logger);
-            promptExecutionSettings = new LLamaSharpPromptExecutionSettings()
+            
+            promptExecutionSettings = new PromptExecutionSettings()
             {
                 ModelId = model.Name,
                 FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: true),
-                ExtensionData = new Dictionary<string, object>(),
+                ExtensionData = new Dictionary<string, object>()
+                {
+                    { "Temperature", 0.1 },
+                    { "TopP", 0.95 }
+                }
             };
-            chat = new LLamaSharpChatCompletion(ex).UsingChatHistoryReducer(new ChatHistoryTruncationReducer(chatHistoryMaxLength));
+            
+            chat = new LlamaFunctionCallingChatCompletionService(ex)
+                .UsingChatHistoryReducer(new ChatHistoryTruncationReducer(chatHistoryMaxLength));
 #pragma warning disable SKEXP0001,SKEXP0010 
-            client = chat.AsChatClient();
-            var embeddingParameters = this.embeddingModel.ModelParamsorConfig is not null ? (LLama.Common.ModelParams) this.embeddingModel.ModelParamsorConfig : new LLama.Common.ModelParams(this.embeddingModel.PathorUrl);
+            client = chat.AsChatClient();            
+            var embeddingParameters = this.embeddingModel.ModelParamsorConfig is not null ? 
+                (LLama.Common.ModelParams) this.embeddingModel.ModelParamsorConfig : new LLama.Common.ModelParams(this.embeddingModel.PathorUrl);
             embeddingParameters.ModelPath = this.embeddingModel.PathorUrl;   
             var elm = LLamaWeights.LoadFromFile(embeddingParameters);
             var embedding = new LLamaEmbedder(elm, embeddingParameters);
             builder.Services.AddEmbeddingGenerator(embedding);
-            Info("Using llama.cpp embedded library with model {0} at {1}.", this.model.Name, this,model.PathorUrl);
+            Info("Using llama.cpp embedded library with model {0} at {1}.", this.model.Name, this.model.PathorUrl);
         }
         else
         {
@@ -123,8 +135,7 @@ public class ModelConversation : Runtime
             var oaiOptions = new OpenAI.OpenAIClientOptions() { Endpoint = endpoint };
             chat = new OpenAIChatCompletionService(model.Name, new Uri(this.model.PathorUrl), apiKey:apiKey, loggerFactory: loggerFactory)
                 .UsingChatHistoryReducer(new ChatHistoryTruncationReducer(chatHistoryMaxLength));
-            client = chat.AsChatClient();
-            
+            client = chat.AsChatClient();            
             builder.AddOpenAIEmbeddingGenerator(this.embeddingModel.Name, new OpenAI.OpenAIClient(apiKeyCred, oaiOptions));
 #pragma warning restore SKEXP0001, SKEXP0010
             promptExecutionSettings = new OpenAIPromptExecutionSettings()
@@ -136,20 +147,17 @@ public class ModelConversation : Runtime
                 MaxTokens = 2048,
                 ExtensionData = new Dictionary<string, object>()
             };
-            Info("Using OpenAI compatible API at {0} with model {1}", this.model.PathorUrl, model);
+            Info("Using OpenAI compatible API at {0} with model {1}", this.model.PathorUrl, model.Name);
         }
         
         builder.Services            
             .AddChatClient(client)
-            .UseFunctionInvocation(loggerFactory, configure =>
-            {
-                configure.TerminateOnUnknownCalls = true;
-            });
-        kernel = builder.Build();
+            .UseFunctionInvocation(loggerFactory)
+            .UseKernelFunctionInvocation(loggerFactory);
+        kernel = builder.Build();        
         
         vectorStore = new InMemoryVectorStore(new InMemoryVectorStoreOptions() { EmbeddingGenerator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>() });
-        
-        
+                
         if (systemPrompts is not null)
         {
             foreach (var systemPrompt in systemPrompts)
@@ -168,7 +176,7 @@ public class ModelConversation : Runtime
     }
     #endregion
 
-    #region Methods and Properties
+    #region Methods
 
     public ModelConversation AddPlugin<T>(string pluginName)
     {
@@ -183,6 +191,7 @@ public class ModelConversation : Runtime
 #pragma warning restore SKEXP0120 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         return this;
     }
+
     public async IAsyncEnumerable<StreamingChatMessageContent> Prompt(string prompt, params object[] args)
     {
         var messageItems = new ChatMessageContentItemCollection()

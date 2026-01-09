@@ -1,16 +1,14 @@
 ﻿namespace OnlyHumans.Understanding.Tests;
 
-using Microsoft.Extensions.Configuration;
-
 public class TestsRuntime : OnlyHumans.TestsRuntime
 {
     static TestsRuntime()
     {
         Initialize("OnlyHumans", "Tests", true);
-        functionGemmaQ8ModelPath = config.GetRequiredValue("FunctionGemmaQ8ModelPath");
-        functionGemmaQ8Model = new Model(ModelRuntime.LlamaCpp, "function-gemma-q8", functionGemmaQ8ModelPath);
+        functiongemmaQ8ModelPath = config.GetRequiredValue("FunctionGemmaQ8ModelPath");
+        functiongemmaQ8Model = new Model(ModelRuntime.LlamaCpp, "function-gemma-q8", functiongemmaQ8ModelPath);
     }
-    static protected readonly string functionGemmaQ8ModelPath;
-    static protected readonly Model functionGemmaQ8Model; 
+    static protected readonly string functiongemmaQ8ModelPath;
+    static protected readonly Model functiongemmaQ8Model; 
 }
 

@@ -102,21 +102,19 @@ public class ModelConversation : Runtime
             parameters.ModelPath = model.PathorUrl;
             LLamaWeights lm = LLamaWeights.LoadFromFile(parameters);
             var context = new LLamaContext(lm, parameters, logger);
-            var ex = new StatelessExecutor(lm, parameters, logger);
+            var ex = new InteractiveExecutor(new LLamaContext(lm, parameters, logger), logger);
             
-            promptExecutionSettings = new PromptExecutionSettings()
+            promptExecutionSettings = new LLamaSharpPromptExecutionSettings()
             {
                 ModelId = model.Name,
                 FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: true),
-                ExtensionData = new Dictionary<string, object>()
-                {
-                    { "Temperature", 0.1 },
-                    { "TopP", 0.95 }
-                }
+                Temperature = 0.1f,
+                TopP = 0.85f,         
             };
             
             chat = new LlamaFunctionCallingChatCompletionService(ex)
                 .UsingChatHistoryReducer(new ChatHistoryTruncationReducer(chatHistoryMaxLength));
+
 #pragma warning disable SKEXP0001,SKEXP0010 
             client = chat.AsChatClient();            
             var embeddingParameters = this.embeddingModel.ModelParamsorConfig is not null ? 

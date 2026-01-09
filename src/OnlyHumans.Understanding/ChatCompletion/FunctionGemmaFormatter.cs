@@ -96,7 +96,7 @@ internal static class FunctionGemmaFormatter
             sb.Append("\n<end_of_turn>\n");
         }
         
-        sb.Append("<start_of_turn>model\n");
+        //sb.Append("<start_of_turn>model\n");
         return sb.ToString();
     }
 

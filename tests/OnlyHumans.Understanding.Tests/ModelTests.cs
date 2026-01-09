@@ -10,7 +10,7 @@ public class ModelTests : TestsRuntime
         Assert.NotNull(mc);
 
         //mc.AddPlugin(p1, "testplugin");
-        var m = mc.Prompt("Add the integers 3 and 5?");
+        var m = mc.Prompt("Add the integers 3 and 5.");
         await foreach (var message in m)
         {
             Console.WriteLine(message);

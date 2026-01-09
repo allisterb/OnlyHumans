@@ -1,3 +1,10 @@
+using LLama;
+using LLama.Common;
+using LLama.Extensions;
+using LLama.Sampling;
+using LLamaSharp.SemanticKernel;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,21 +12,17 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using LLama;
-using LLama.Common;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
 using SKChatHistory = Microsoft.SemanticKernel.ChatCompletion.ChatHistory;
 
 namespace OnlyHumans.ChatCompletion;
 
 public class LlamaFunctionCallingChatCompletionService : IChatCompletionService
 {
-    private readonly StatelessExecutor _executor;
+    private readonly InteractiveExecutor _executor;
 
     public IReadOnlyDictionary<string, object?> Attributes => new Dictionary<string, object?>();
 
-    public LlamaFunctionCallingChatCompletionService(StatelessExecutor executor)
+    public LlamaFunctionCallingChatCompletionService(InteractiveExecutor executor)
     {
         _executor = executor;
     }
@@ -30,6 +33,7 @@ public class LlamaFunctionCallingChatCompletionService : IChatCompletionService
         Kernel? kernel = null,
         CancellationToken cancellationToken = default)
     {
+        var settings = executionSettings as LLamaSharpPromptExecutionSettings;
         List<KernelFunction>? functions = null;
         if (executionSettings?.FunctionChoiceBehavior != null && kernel != null)
         {
@@ -41,7 +45,7 @@ public class LlamaFunctionCallingChatCompletionService : IChatCompletionService
         var inferenceParams = GetInferenceParams(executionSettings);
         
         var sb = new StringBuilder();
-        await foreach (var token in _executor.InferAsync(prompt, inferenceParams, cancellationToken))
+        await foreach (var token in _executor.InferAsync(prompt, ToLLamaSharpInferenceParams(settings), cancellationToken:cancellationToken))
         {
             sb.Append(token);
         }
@@ -68,7 +72,7 @@ public class LlamaFunctionCallingChatCompletionService : IChatCompletionService
             }
         }
 
-        return new[] { content };
+        return [content];
     }
 
     public async IAsyncEnumerable<StreamingChatMessageContent> GetStreamingChatMessageContentsAsync(
@@ -96,5 +100,34 @@ public class LlamaFunctionCallingChatCompletionService : IChatCompletionService
 
        
         return inferenceParams;
+    }
+
+    internal static InferenceParams ToLLamaSharpInferenceParams(LLamaSharpPromptExecutionSettings requestSettings)
+    {
+        if (requestSettings is null)
+        {
+            throw new ArgumentNullException(nameof(requestSettings));
+        }
+
+        var antiPrompts = new List<string>(requestSettings.StopSequences)
+        {
+            $"{Microsoft.SemanticKernel.ChatCompletion.AuthorRole.User}:",
+            $"{Microsoft.SemanticKernel.ChatCompletion.AuthorRole.Assistant}:",
+            $"{Microsoft.SemanticKernel.ChatCompletion.AuthorRole.System}:",
+            "<start_function_response>", "<end_of_turn>", "<start_of_turn>"
+        };
+        return new InferenceParams
+        {
+            AntiPrompts = antiPrompts,
+            MaxTokens = requestSettings.MaxTokens ?? 2048,
+
+            SamplingPipeline = new DefaultSamplingPipeline()
+            {
+                Temperature = (float)requestSettings.Temperature,
+                TopP = (float)requestSettings.TopP,
+                RepeatPenalty = 1.2f,
+                TopK = 40,  
+            }
+        };
     }
 }

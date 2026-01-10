@@ -14,6 +14,7 @@ namespace OnlyHumans
 {
     public class MemoryPlugin : IPlugin
     {
+        public string Name => "Memory";   
         Memory memory;
         IKernelMemory kernelMemory;
         string defaultIndex;

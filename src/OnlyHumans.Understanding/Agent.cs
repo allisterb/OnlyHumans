@@ -14,7 +14,7 @@ using Microsoft.SemanticKernel.Functions;
 
 public class AgentConversation : ModelConversation
 {
-    public AgentConversation(Model model, Model embeddingModel, string instructions, string name = "Default Agent", string[]? systemPrompts = null, (IPlugin, string)[]? plugins = null, 
+    public AgentConversation(Model model, Model embeddingModel, string instructions, string name = "Default Agent", string[]? systemPrompts = null, IPlugin[]? plugins = null, 
         Dictionary<string, Dictionary<string, object>>? sharedState = null, bool immutableKernel = false,  ILoggerFactory? loggerFactory = null)
                 : base(model, embeddingModel, systemPrompts)
     {
@@ -54,11 +54,11 @@ public class AgentConversation : ModelConversation
         return this;
     }
 
-    public AgentConversation AddPlugins(params (IPlugin, string)[] plugins)
+    public AgentConversation AddPlugins(params IPlugin[] plugins)
     {
-        foreach (var (plugin, pluginName) in plugins)
+        foreach (var plugin in plugins)
         {
-            kernel.Plugins.AddFromObject(plugin, pluginName);
+            kernel.Plugins.AddFromObject(plugin, plugin.Name);
         }
         return this;
     }

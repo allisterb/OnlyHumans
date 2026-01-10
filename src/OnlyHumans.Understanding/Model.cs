@@ -57,7 +57,7 @@ public class ModelConversation : Runtime
      .WithCuda(false)
      .WithAutoFallback(true);
     }
-    public ModelConversation(Model model, Model? embeddingModel = null, string[]? systemPrompts = null, (IPlugin, string)[]? plugins = null)
+    public ModelConversation(Model model, Model? embeddingModel = null, string[]? systemPrompts = null, params IPlugin[]? plugins)
     {        
         this.model = model;    
         this.embeddingModel = embeddingModel ?? model;
@@ -166,9 +166,9 @@ public class ModelConversation : Runtime
 
         if (plugins is not null)
         {
-            foreach (var (plugin, pluginName) in plugins)
+            foreach (var plugin in plugins)
             {
-                kernel.Plugins.AddFromObject(plugin, pluginName);
+                kernel.Plugins.AddFromObject(plugin, plugin.Name);
             }
         }
     }

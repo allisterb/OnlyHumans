@@ -8,7 +8,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace OnlyHumans.ChatCompletion;
 
-internal static class FunctionGemmaFormatter
+internal static class FunctionGemmaTemplate
 {
     public static string FormatPrompt(ChatHistory history, IEnumerable<KernelFunction>? functions)
     {

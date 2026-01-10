@@ -40,9 +40,9 @@ public class LlamaFunctionCallingChatCompletionService : IChatCompletionService
              functions = kernel.Plugins.SelectMany(p => p).ToList();
         }
 
-        string prompt = FunctionGemmaFormatter.FormatPrompt(chatHistory, functions);
+        string prompt = FunctionGemmaTemplate.FormatPrompt(chatHistory, functions);
         
-        var inferenceParams = GetInferenceParams(executionSettings);
+
         
         var sb = new StringBuilder();
         await foreach (var token in _executor.InferAsync(prompt, ToLLamaSharpInferenceParams(settings), cancellationToken:cancellationToken))
@@ -53,11 +53,12 @@ public class LlamaFunctionCallingChatCompletionService : IChatCompletionService
         
         var content = new ChatMessageContent(Microsoft.SemanticKernel.ChatCompletion.AuthorRole.Assistant, output);
         
-        var calls = FunctionGemmaFormatter.ParseFunctionCalls(output);
+        var calls = FunctionGemmaTemplate.ParseFunctionCalls(output);
+        //calls[0].
         if (calls.Any())
         {
             content.Items.Clear(); 
-            content.Content = FunctionGemmaFormatter.RemoveFunctionCalls(output);
+            content.Content = FunctionGemmaTemplate.RemoveFunctionCalls(output);
             
             foreach (var call in calls)
             {

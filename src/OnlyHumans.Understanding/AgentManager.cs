@@ -30,7 +30,7 @@ public class AgentManager : Runtime
         op.Complete();
     }
 
-    public AgentConversation StartUserSession(string prompt, params (IPlugin, string)[] plugins)
+    public AgentConversation StartUserSession(string prompt, params IPlugin[] plugins)
     {
         var c = new AgentConversation(textModel, embeddingModel, prompt, "Startup Agent", plugins:plugins, systemPrompts: systemPrompts)
         {

@@ -33,6 +33,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{1E1DB4B5-E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interfaces", "Interfaces", "{55533B3F-104E-4125-89A9-DDB0DA56BD72}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jumbee.Console.TestDemo", "..\ext\Jumbee.Console\src\Jumbee.Console.TestDemo\Jumbee.Console.TestDemo.csproj", "{9235D1F6-DA04-FFFD-94BA-21D38701FBEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vezel.Cathode.AnsiControlSequenceBuilder", "..\ext\Jumbee.Console\ext\Vezel.Cathode.AnsiControlSequenceBuilder\Vezel.Cathode.AnsiControlSequenceBuilder.csproj", "{8167714D-1A09-9C5F-3CCC-BBEDFB8EC09A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +83,14 @@ Global
 		{D5056712-41B2-13A0-6497-5C66A28C70EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5056712-41B2-13A0-6497-5C66A28C70EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5056712-41B2-13A0-6497-5C66A28C70EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9235D1F6-DA04-FFFD-94BA-21D38701FBEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9235D1F6-DA04-FFFD-94BA-21D38701FBEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9235D1F6-DA04-FFFD-94BA-21D38701FBEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9235D1F6-DA04-FFFD-94BA-21D38701FBEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8167714D-1A09-9C5F-3CCC-BBEDFB8EC09A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8167714D-1A09-9C5F-3CCC-BBEDFB8EC09A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8167714D-1A09-9C5F-3CCC-BBEDFB8EC09A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8167714D-1A09-9C5F-3CCC-BBEDFB8EC09A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,6 +107,8 @@ Global
 		{DCDFB1CB-4777-ECC7-D69C-79DB9EFF1C8E} = {B3B51EEB-00C8-4BD3-99C1-A45025573399}
 		{B3B51EEB-00C8-4BD3-99C1-A45025573399} = {8B0C4C31-6AAD-418A-868E-CE0536AFE841}
 		{D5056712-41B2-13A0-6497-5C66A28C70EF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{9235D1F6-DA04-FFFD-94BA-21D38701FBEF} = {8B0C4C31-6AAD-418A-868E-CE0536AFE841}
+		{8167714D-1A09-9C5F-3CCC-BBEDFB8EC09A} = {B3B51EEB-00C8-4BD3-99C1-A45025573399}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2FDF94FF-73B5-4BDF-AB3C-30A7FA9AC990}

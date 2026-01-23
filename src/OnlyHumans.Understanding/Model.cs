@@ -53,10 +53,11 @@ public class ModelConversation : Runtime
     static ModelConversation()
     {
         NativeLibraryConfig.LLama
-     .WithLogCallback(logger)
-     .WithCuda(false)
-     .WithAutoFallback(true);
+         .WithLogCallback(logger)
+         .WithCuda(false)
+         .WithAutoFallback(true);
     }
+
     public ModelConversation(Model model, Model? embeddingModel = null, string[]? systemPrompts = null, params IPlugin[]? plugins)
     {        
         this.model = model;    
@@ -114,7 +115,7 @@ public class ModelConversation : Runtime
             
             chat = new LlamaFunctionCallingChatCompletionService(ex)
                 .UsingChatHistoryReducer(new ChatHistoryTruncationReducer(chatHistoryMaxLength));
-
+        
 #pragma warning disable SKEXP0001,SKEXP0010 
             client = chat.AsChatClient();            
             var embeddingParameters = this.embeddingModel.ModelParamsorConfig is not null ? 

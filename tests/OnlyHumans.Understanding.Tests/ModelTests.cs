@@ -18,4 +18,16 @@ public class ModelTests : TestsRuntime
         Assert.NotEmpty(mc.messages);
 
     }
+
+    [Fact]
+    public async Task CanLoadGoogleGemini3ProModel()
+    {
+        var mc = new ModelConversation(gemma3ProModel);
+        var m = mc.Prompt("Hello who are you");
+        await foreach (var message in m)
+        {
+            Console.WriteLine(message);
+        }
+        Assert.NotEmpty(mc.messages);
+    }
 }

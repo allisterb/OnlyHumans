@@ -1,10 +1,9 @@
 ﻿namespace OnlyHumans;
 
-using LLama;
-using LLama.Native;
-using LLama.Transformers;
-using LLamaSharp.SemanticKernel;
-using LLamaSharp.SemanticKernel.ChatCompletion;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,18 +15,23 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.InMemory;
 using Microsoft.SemanticKernel.Connectors.Ollama;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.Connectors.Google;
 using Microsoft.SemanticKernel.Embeddings;
+
+using LLama;
+using LLama.Native;
+using LLama.Transformers;
+using LLamaSharp.SemanticKernel;
+using LLamaSharp.SemanticKernel.ChatCompletion;
 using OllamaSharp;
 using OnlyHumans.ChatCompletion;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 public enum ModelRuntime
 {
     Ollama,
     LlamaCpp,
-    OpenAI
+    OpenAI,
+    GoogleGemini
 }
 
 public record Model
@@ -37,7 +41,7 @@ public record Model
     public string PathorUrl { get; }
     public object? ModelParamsorConfig { get; } 
     public Uri? DownloadUri { get; }
-    public Model(ModelRuntime runtime, string name, string pathorUrl, object? modelParamsorConfig = null, Uri? downloadUri = null)
+    public Model(ModelRuntime runtime, string name, string pathorUrl = Model.PathNotRequired, object? modelParamsorConfig = null, Uri? downloadUri = null)
     {
         this.Runtime = runtime; 
         this.Name = name;   
@@ -45,6 +49,7 @@ public record Model
         this.ModelParamsorConfig = modelParamsorConfig; 
         this.DownloadUri = downloadUri;
     }
+    public const string PathNotRequired = "";
 }
 
 public class ModelConversation : Runtime
@@ -126,9 +131,9 @@ public class ModelConversation : Runtime
             builder.Services.AddEmbeddingGenerator(embedding);
             Info("Using llama.cpp embedded library with model {0} at {1}.", this.model.Name, this.model.PathorUrl);
         }
-        else
+        else if (model.Runtime == ModelRuntime.OpenAI)
         {
-            var apiKey = config?["Model:ApiKey"] ?? throw new Exception(); ;
+            var apiKey = config?["Model:ApiKey"] ?? throw new Exception();
             var apiKeyCred = new System.ClientModel.ApiKeyCredential(apiKey);
             var endpoint = new Uri(this.model.PathorUrl);
             var oaiOptions = new OpenAI.OpenAIClientOptions() { Endpoint = endpoint };
@@ -148,8 +153,26 @@ public class ModelConversation : Runtime
             };
             Info("Using OpenAI compatible API at {0} with model {1}", this.model.PathorUrl, model.Name);
         }
-        
-        builder.Services            
+        else if (model.Runtime == ModelRuntime.GoogleGemini)
+        {
+            var apiKey = config?["Model:ApiKey"] ?? throw new Exception();
+            chat = new GoogleAIGeminiChatCompletionService(model.Name, apiKey, loggerFactory: loggerFactory);
+            client = chat.AsChatClient();
+            builder.AddGoogleAIEmbeddingGenerator(this.embeddingModel.Name, apiKey);
+            promptExecutionSettings = new GeminiPromptExecutionSettings()
+            {
+                ModelId = this.model.Name,
+                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: true),
+                ToolCallBehavior = GeminiToolCallBehavior.AutoInvokeKernelFunctions,
+            };
+            Info("Using Google Gemini model {0}.", model.Name);
+        }
+        else
+        {
+            throw new NotImplementedException();
+        }
+
+        builder.Services
             .AddChatClient(client)
             .UseFunctionInvocation(loggerFactory)
             .UseKernelFunctionInvocation(loggerFactory);
